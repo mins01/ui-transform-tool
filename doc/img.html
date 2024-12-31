@@ -128,11 +128,13 @@
                 if(dotH=="0"){
                     let width = this.fli.width + (this.distanceX * -1);
                     width = Math.max(this.tli.minWidth,this.fli.minWidth,Math.min(width,this.tli.maxWidth,this.fli.maxWidth));
-                    this.tool.style.setProperty('--width',width+'px');
-                    this.fitElement.style.width = width+'px';
-                                       
-                    this.tool.style.setProperty('--left',(this.tli.left + this.distanceX)+'px');
-                    this.fitElement.style.left = (this.fli.left + this.distanceX)+'px';
+                    if(parseFloat(this.fitElement.style.width)!=width){
+                        this.tool.style.setProperty('--width',width+'px');
+                        this.fitElement.style.width = width+'px';
+                                           
+                        this.tool.style.setProperty('--left',(this.tli.left + this.distanceX)+'px');
+                        this.fitElement.style.left = (this.fli.left + this.distanceX)+'px';
+                    }
                 }else if(dotH=="1"){
                 }else if(dotH=='2'){
                     let width = this.fli.width + this.distanceX;               
@@ -143,11 +145,13 @@
                 if(dotV=="0"){
                     let height = this.fli.height + (this.distanceY * -1);
                     height = Math.max(this.tli.minHeight,this.fli.minHeight,Math.min(height,this.tli.maxHeight,this.fli.maxHeight));
-                    this.tool.style.setProperty('--height',height+'px');
-                    this.fitElement.style.height = height+'px';
+                    if(parseFloat(this.fitElement.style.height)!=height){
+                        this.tool.style.setProperty('--height',height+'px');
+                        this.fitElement.style.height = height+'px';
 
-                    this.tool.style.setProperty('--top',(this.tli.top + this.distanceY)+'px');
-                    this.fitElement.style.top = (this.fli.top + this.distanceY)+'px';
+                        this.tool.style.setProperty('--top',(this.tli.top + this.distanceY)+'px');
+                        this.fitElement.style.top = (this.fli.top + this.distanceY)+'px';
+                    }
                 }else if(dotV=="1"){
                 }else if(dotV=="2"){
                     let height = this.fli.height + this.distanceY;
@@ -159,19 +163,19 @@
 
                 this.fit(this.fitElement)
             }
-            utt02.onmoveTool = function(event){
-                if(!this.fitElement){ return; }
+            // utt02.onmoveTool = function(event){
+            //     if(!this.fitElement){ return; }
 
-                let l = this.tli.left + this.distanceX;
-                let fel = this.fli.left + this.distanceX;
-                this.tool.style.setProperty('--left',l+'px');
-                this.fitElement.style.left = fel+'px';
+            //     let l = this.tli.left + this.distanceX;
+            //     let fel = this.fli.left + this.distanceX;
+            //     this.tool.style.setProperty('--left',l+'px');
+            //     this.fitElement.style.left = fel+'px';
 
-                let t = this.tli.top + this.distanceY;
-                let fet = this.fli.top + this.distanceY;
-                this.tool.style.setProperty('--top',t+'px');
-                this.fitElement.style.top = fet+'px';
-            }
+            //     let t = this.tli.top + this.distanceY;
+            //     let fet = this.fli.top + this.distanceY;
+            //     this.tool.style.setProperty('--top',t+'px');
+            //     this.fitElement.style.top = fet+'px';
+            // }
         })
 
         window.addEventListener('resize',(event)=>{
@@ -214,8 +218,8 @@
         </div>
         <div style="position: relative; height: 600px;;">
             <img id="test-image-01" src="../asset/bg.gif" style=" position: absolute;top:10px;left:10px; width:400px;height: 300px;" alt="" onclick="utt01.fit(this);utt01.hide(false);utt01.active()">
-            <hr>
-            <img id="test-image-02" src="../asset/bg.gif" style=" position: absolute;top:400px;left:10px; width:400px;;" alt="" onclick="utt02.fit(this);utt02.hide(false);utt02.active()">
+            
+            <img id="test-image-02" src="../asset/bg.gif" style=" position: absolute;top:400px;left:10px; width:400px;height: 400px;" alt="" onclick="utt02.fit(this);utt02.hide(false);utt02.active()">
         </div>
     </div>
     <script>
