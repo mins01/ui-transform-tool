@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="ko" >
+<head>
+    <title>ui-transform-tool</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Script-Type" content="text/javascript">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="shortcut icon" href="http://www.mins01.com/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script src="/js/ForGoogle.js"></script>
+    <!-- google analytics -->
+    <script>if(window.ForGoogle){ ForGoogle.analytics() }else{ console.log("failure : ForGoogle.analytics()");}</script>
+
+
+    <!-- jquery 관련 -->
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+
+    <!-- 부트스트랩 5.3.x -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <!-- vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+    <!-- meta og -->
+
+    <meta property="og:title" content="ui-transform-tool">
+    <meta property="og:description" content="ui-transform-tool">
+    <meta name="og:image" content="http://www.mins01.com/img/logo.gif">
+    <meta property="og:image:width" content="190">
+    <meta property="og:image:height" content="70" />
+    <meta property="og:site_name" content="ui-transform-tool" />
+    <meta property="og:type" content="website">
+
+    <!-- //meta og -->
+
+    <link rel="stylesheet" href="../asset/ui-transform-tool.css">
+    <script src="../lib/UiTransformTool.js"></script>
+    <script>
+        window.addEventListener('load',(event)=>{
+            const utt01 = globalThis.utt01 = new UiTransformTool(document.querySelector('#utt01'))
+            utt01.addEventListener();
+            utt01.ondown = function(event){
+                if(!this.fitElement){ return; }
+                this.tli = this.getLayoutInfo(this.tool);
+                this.fli = this.getLayoutInfo(this.fitElement);
+                // console.log(this.fli,this.fli);
+
+            }
+            utt01.onmoveDot = function(event){
+                if(!this.fitElement){ return; }
+
+
+                const dot = this.eventElement.dataset.dot;
+                if(!dot){ return; }
+                const dotV = dot[0];
+                const dotH = dot[1];
+                // console.log(dotH,dotV,);
+                if(dotH=="0"){
+                    let width = this.fli.width - this.distanceX;
+                    width = Math.max(this.tli.minWidth,Math.min(width,this.tli.maxWidth));
+                    this.tool.style.setProperty('--width',width+'px');
+                    this.fitElement.style.width = width+'px';
+                    this.fitElement.style.minWidth = width+'px';
+                    this.fitElement.style.maxWidth = width+'px';
+                }else if(dotH=="1"){
+                }else if(dotH=="2"){
+                    let width = this.fli.width + this.distanceX;
+                    width = Math.max(this.tli.minWidth,Math.min(width,this.tli.maxWidth));
+                    this.tool.style.setProperty('--width',width+'px');
+                    this.fitElement.style.width = width+'px';
+                    this.fitElement.style.minWidth = width+'px';
+                    this.fitElement.style.maxWidth = width+'px';
+                }
+
+                if(dotV=="0"){
+                    let height = this.fli.height - this.distanceY;
+                    height = Math.max(this.tli.minHeight,Math.min(height,this.tli.maxHeight));
+                    this.tool.style.setProperty('--height',height+'px');
+                    this.fitElement.style.height = height+'px';
+                    this.fitElement.style.minHeight = height+'px';
+                    this.fitElement.style.maxHeight = height+'px';
+                }else if(dotV=="1"){
+                }else if(dotV=="2"){
+                    let height = this.fli.height + this.distanceY;
+                    height = Math.max(this.tli.minHeight,Math.min(height,this.tli.maxHeight));
+                    this.tool.style.setProperty('--height',height+'px');
+                    this.fitElement.style.height = height+'px';
+                    this.fitElement.style.minHeight = height+'px';
+                    this.fitElement.style.maxHeight = height+'px';
+                }
+
+                this.fit(this.fitElement)
+            }
+            // utt01.onmoveTool = function(event){
+            //     if(!this.fitElement){ return; }
+
+            //     let l = this.tli.left + this.distanceX;
+            //     let fel = this.fli.left + this.distanceX;
+            //     this.tool.style.setProperty('--left',l+'px');
+            //     this.fitElement.style.left = fel+'px';
+
+            //     let t = this.tli.top + this.distanceY;
+            //     let fet = this.fli.top + this.distanceY;
+            //     this.tool.style.setProperty('--top',t+'px');
+            //     this.fitElement.style.top = fet+'px';
+            // }
+
+
+
+            const utt02 = globalThis.utt02 = new UiTransformTool(document.querySelector('#utt02'))
+            utt02.addEventListener();
+            utt02.ondown = function(event){
+                if(!this.fitElement){ return; }
+                this.tli = this.getLayoutInfo(this.tool);
+                this.fli = this.getLayoutInfo(this.fitElement);
+                this.fFlexGrow = parseInt(this.fitElement.style.flexGrow);
+                // console.log(this.fli,this.fli);
+
+            }
+            utt02.onmoveDot = function(event){
+                if(!this.fitElement){ return; }
+
+                const dot = this.eventElement.dataset.dot;
+                if(!dot){ return; }
+                const dotV = dot[0];
+                const dotH = dot[1];
+                // console.log(dotH,dotV,);
+                if(dotH=="0"){
+                    let width = this.fli.width - this.distanceX;
+                    width = Math.max(this.tli.minWidth,Math.min(width,this.tli.maxWidth));
+                    this.tool.style.setProperty('--width',width+'px');
+                    // this.fitElement.style.width = width+'px';
+                    // this.fitElement.style.minWidth = width+'px';
+                    // this.fitElement.style.maxWidth = width+'px';
+                    this.fitElement.style.flexGrow = this.fFlexGrow - this.distanceY/100;
+                }else if(dotH=="1"){
+                }else if(dotH=="2"){
+                    let width = this.fli.width + (this.distanceX);
+                    width = Math.max(this.tli.minWidth,Math.min(width,this.tli.maxWidth));
+                    this.tool.style.setProperty('--width',width+'px');
+                    // this.fitElement.style.width = width+'px';
+                    // this.fitElement.style.minWidth = width+'px';
+                    // this.fitElement.style.maxWidth = width+'px';
+                    this.fitElement.style.flexGrow = this.fFlexGrow + this.distanceY/100;
+
+                }
+
+                if(dotV=="0"){
+                    let height = this.fli.height - this.distanceY;
+                    height = Math.max(this.tli.minHeight,Math.min(height,this.tli.maxHeight));
+                    this.tool.style.setProperty('--height',height+'px');
+                    // this.fitElement.style.height = height+'px';
+                    // this.fitElement.style.minHeight = height+'px';
+                    // this.fitElement.style.maxHeight = height+'px';
+                    this.fitElement.style.flexGrow = this.fFlexGrow - this.distanceY/100;
+                    
+                }else if(dotV=="1"){
+                }else if(dotV=="2"){
+                    let height = this.fli.height + this.distanceY;
+                    height = Math.max(this.tli.minHeight,Math.min(height,this.tli.maxHeight));
+                    this.tool.style.setProperty('--height',height+'px');
+                    // this.fitElement.style.height = height+'px';
+                    // this.fitElement.style.minHeight = height+'px';
+                    // this.fitElement.style.maxHeight = height+'px';
+                    this.fitElement.style.flexGrow = this.fFlexGrow + this.distanceY/100;
+                }
+
+                this.fit(this.fitElement)
+            }
+            // utt02.onmoveTool = function(event){
+            //     if(!this.fitElement){ return; }
+
+            //     let l = this.tli.left + this.distanceX;
+            //     let fel = this.fli.left + this.distanceX;
+            //     this.tool.style.setProperty('--left',l+'px');
+            //     this.fitElement.style.left = fel+'px';
+
+            //     let t = this.tli.top + this.distanceY;
+            //     let fet = this.fli.top + this.distanceY;
+            //     this.tool.style.setProperty('--top',t+'px');
+            //     this.fitElement.style.top = fet+'px';
+            // }
+        })
+
+        window.addEventListener('resize',(event)=>{
+            utt01.fit(utt01.fitElement)
+            utt02.fit(utt02.fitElement)
+        })
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>ui-transform-tool</h1>
+        <h2>flex children resize</h2>
+        <div class="ui-transform-tool-container">
+            <div id="utt01" class="ui-transform-tool  transformable" style="position: absolute; --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 5px; min-height: 5px;max-width: 600px; ">
+                <!-- <button type="button" class="dot" data-dot="00"></button> -->
+                <!-- <button type="button" class="dot" data-dot="01"></button> -->
+                <!-- <button type="button" class="dot" data-dot="02"></button> -->
+                <button type="button" class="dot" data-dot="10"></button>
+                <!-- <button type="button" class="dot" data-dot="11"></button> -->
+                <button type="button" class="dot" data-dot="12"></button>
+                <!-- <button type="button" class="dot" data-dot="20"></button> -->
+                <!-- <button type="button" class="dot" data-dot="21"></button> -->
+                <!-- <button type="button" class="dot" data-dot="22"></button> -->
+            </div>
+        </div>
+
+        <div class="ui-transform-tool-container">
+            <div id="utt02" class="ui-transform-tool  transformable" style="position: absolute; --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 5px;">
+                <!-- <button type="button" class="dot" data-dot="00"></button> -->
+                <button type="button" class="dot" data-dot="01"></button>
+                <!-- <button type="button" class="dot" data-dot="02"></button> -->
+                <!-- <button type="button" class="dot" data-dot="10"></button> -->
+                <!-- <button type="button" class="dot" data-dot="11"></button> -->
+                <!-- <button type="button" class="dot" data-dot="12"></button> -->
+                <!-- <button type="button" class="dot" data-dot="20"></button> -->
+                <button type="button" class="dot" data-dot="21"></button>
+                <!-- <button type="button" class="dot" data-dot="22"></button> -->
+            </div>
+        </div>
+        <div>
+            <h3>.width, .maxWidth, .minWidth</h3>
+            <div id="flex-01" style="display: flex; height: 50svh; text-align: center; ">
+                <div style="flex:1 1 auto; background-color: #abc;" onclick="utt01.fit(this);utt01.hide(false);utt01.active()">1</div>
+                <div style="flex:1 1 auto; background-color: #cab;" onclick="utt01.fit(this);utt01.hide(false);utt01.active()">2</div>
+                <div style="flex:1 1 auto; background-color: #cba;" onclick="utt01.fit(this);utt01.hide(false);utt01.active()">3</div>
+                <div style="flex:1 1 auto; background-color: #fbc;" onclick="utt01.fit(this);utt01.hide(false);utt01.active()">4</div>
+                <div style="flex:1 1 auto; background-color: #afc;" onclick="utt01.fit(this);utt01.hide(false);utt01.active()">5</div>
+                <div style="flex:1 1 auto; background-color: #abf;" onclick="utt01.fit(this);utt01.hide(false);utt01.active()">6</div>
+            </div>
+            <hr>
+            <h3>.flexGrow</h3>
+            <div id="flex-02" style="display: flex; height: 50svh; flex-direction: column; text-align: center; ">
+                <div style="flex:1 1 auto; background-color: #abc;" onclick="utt02.fit(this);utt02.hide(false);utt02.active()">1</div>
+                <div style="flex:1 1 auto; background-color: #cab;" onclick="utt02.fit(this);utt02.hide(false);utt02.active()">2</div>
+                <div style="flex:1 1 auto; background-color: #cba;" onclick="utt02.fit(this);utt02.hide(false);utt02.active()">3</div>
+                <div style="flex:1 1 auto; background-color: #fbc;" onclick="utt02.fit(this);utt02.hide(false);utt02.active()">4</div>
+                <div style="flex:1 1 auto; background-color: #afc;" onclick="utt02.fit(this);utt02.hide(false);utt02.active()">5</div>
+                <div style="flex:1 1 auto; background-color: #abf;" onclick="utt02.fit(this);utt02.hide(false);utt02.active()">6</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.addEventListener('load',(event)=>{
+            document.querySelector('#flex-01').firstElementChild.click();
+            document.querySelector('#flex-02').firstElementChild.click();
+            // document.querySelector('#test-image-02').click();
+        })
+    </script>
+</body>
+</html>
