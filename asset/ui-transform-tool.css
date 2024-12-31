@@ -12,16 +12,16 @@
     position: relative;
     box-sizing:border-box;
     z-index: 1;
-    border: 1px dashed #999999;
+    border: 1px solid #3333ff;
+    touch-action: none;
 }
 .ui-transform-tool{
     z-index: 1;
-    opacity: 0.5;
+    opacity: 0.3;
 }
 .ui-transform-tool.active{
     z-index: 100;
     opacity: 1;
-    mix-blend-mode:difference
 }
 .ui-transform-tool.hide{
     display: none;
@@ -30,7 +30,7 @@
     width: var(--dot-width);
     height: var(--dot-height);
     position: absolute;
-    border: 1px solid #999999;
+    border: 1px solid #3333ff;
     background-color: transparent;
     display: block;
     padding:0;margin:0;
@@ -73,5 +73,21 @@
 .ui-transform-tool .dot[data-dot="22"]{
     right:calc( var(--dot-width) / 2 * -1 );
     bottom:calc( -1 *var(--dot-height) / 2 );
-    cursor: nwse-resize;
+    
 }
+
+
+/* cursor */
+.ui-transform-tool.moveable{ cursor: move; }
+
+.ui-transform-tool .dot[data-dot="00"]{ cursor: nwse-resize; }
+.ui-transform-tool .dot[data-dot="01"]{  }
+.ui-transform-tool .dot[data-dot="02"]{  }
+.ui-transform-tool .dot[data-dot="10"]{ cursor: e-resize;  }
+.ui-transform-tool .dot[data-dot="11"]{ cursor: not-allowed;  }
+.ui-transform-tool .dot[data-dot="12"]{ cursor: e-resize;  }
+.ui-transform-tool .dot[data-dot="20"]{  }
+.ui-transform-tool .dot[data-dot="21"]{  }
+.ui-transform-tool .dot[data-dot="22"]{ cursor: nwse-resize; }
+
+
