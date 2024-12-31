@@ -48,26 +48,28 @@
             const utt00 = globalThis.utt00 = new UiTransformTool(document.querySelector('#utt00'))
             utt00.addEventListener();
             utt00.ondown = function(event){                
-                this.w0 = parseInt(this.tool.style.getPropertyValue('--width'));
-                this.h0 = parseInt(this.tool.style.getPropertyValue('--height'));
-                this.l0 = parseInt(this.tool.style.getPropertyValue('--left'));
-                this.t0 = parseInt(this.tool.style.getPropertyValue('--top'));
+                this.w0 = parseFloat(this.tool.style.getPropertyValue('--width'));
+                this.h0 = parseFloat(this.tool.style.getPropertyValue('--height'));
+                this.l0 = parseFloat(this.tool.style.getPropertyValue('--left'));
+                this.t0 = parseFloat(this.tool.style.getPropertyValue('--top'));
                 const gcs = getComputedStyle(this.tool)
-                this.minw0 = gcs.minWidth==='none'?null:parseInt(gcs.minWidth);
-                this.minh0 = gcs.minHeight==='none'?null:parseInt(gcs.minHeight);
-                this.maxw0 = gcs.maxWidth==='none'?null:parseInt(gcs.maxWidth);
-                this.maxh0 = gcs.maxHeight==='none'?null:parseInt(gcs.maxHeight);
+                this.minw0 = gcs.minWidth==='none'?-Infinity:parseFloat(gcs.minWidth);
+                this.minh0 = gcs.minHeight==='none'?-Infinity:parseFloat(gcs.minHeight);
+                this.maxw0 = gcs.maxWidth==='none'?Infinity:parseFloat(gcs.maxWidth);
+                this.maxh0 = gcs.maxHeight==='none'?Infinity:parseFloat(gcs.maxHeight);
             }
             utt00.onmoveDot22 = function(event){
                 let w = Math.max(0,this.w0 + this.distanceX);
                 let h = Math.max(0,this.h0 + this.distanceY);
                 console.log(this.minw0,w,this.maxw0);
                 
-                if((this.minw0===null || this.minw0 <= w) && (this.maxw0===null || this.maxw0 >= w)){
+                let w1 = Math.max(this.minw0,Math.min(w,this.maxw0));
+                let h1 = Math.max(this.minh0,Math.min(h,this.maxh0));
+                if(w !== w1){
                     this.tool.style.setProperty('--width',w+'px');
                     this.fitElement.style.width = w+'px';
                 }
-                if((this.minh0===null || this.minh0 <= h) && (this.maxh0===null || this.maxh0 >= h)){
+                if(h != h1){
                     this.tool.style.setProperty('--height',h+'px');
                     this.fitElement.style.height = h+'px';
                 }
@@ -76,19 +78,14 @@
 
             utt00.onmoveDot12 = function(event){
                 let w = Math.max(0,this.w0 + this.distanceX);
-                // let h = Math.max(0,this.h0 + this.distanceY);
-                console.log(this.minw0,w,this.maxw0);
+                let w1 = Math.max(this.minw0,Math.min(w,this.maxw0));
+
+                this.tool.style.setProperty('--width',w1+'px');
+                this.fitElement.style.width = w1+'px';
+                this.fitElement.style.minWidth = w1+'px';
+                this.fitElement.style.maxWidth = w1+'px';
                 
-                if((this.minw0===null || this.minw0 <= w) && (this.maxw0===null || this.maxw0 >= w)){
-                    this.tool.style.setProperty('--width',w+'px');
-                    this.fitElement.style.width = w+'px';
-                    this.fitElement.style.minWidth = w+'px';
-                    this.fitElement.style.maxWidth = w+'px';
-                }
-                // if((this.minh0===null || this.minh0 <= h) && (this.maxh0===null || this.maxh0 >= h)){
-                //     this.tool.style.setProperty('--height',h+'px');
-                //     this.fitElement.style.height = h+'px';
-                // }
+
                 this.fit(this.fitElement)
             }
             utt00.onmoveDot10 = function(event){
@@ -161,7 +158,51 @@
                 }
                 
             }
-            
+
+
+            const utt02 = globalThis.utt02 = new UiTransformTool(document.querySelector('#utt02'))
+            utt02.addEventListener();
+            utt02.ondown = function(event){                
+                this.w0 = parseFloat(this.tool.style.getPropertyValue('--width'));
+                this.h0 = parseFloat(this.tool.style.getPropertyValue('--height'));
+                this.l0 = parseFloat(this.tool.style.getPropertyValue('--left'));
+                this.t0 = parseFloat(this.tool.style.getPropertyValue('--top'));
+                const gcs = getComputedStyle(this.tool)
+                this.minw0 = gcs.minWidth==='none'?-Infinity:parseFloat(gcs.minWidth);
+                this.minh0 = gcs.minHeight==='none'?-Infinity:parseFloat(gcs.minHeight);
+                this.maxw0 = gcs.maxWidth==='none'?Infinity:parseFloat(gcs.maxWidth);
+                this.maxh0 = gcs.maxHeight==='none'?Infinity:parseFloat(gcs.maxHeight);
+
+                this.fel0 = parseFloat(this.fitElement.style.left);
+                this.fet0 = parseFloat(this.fitElement.style.top);
+            }
+            utt02.onmoveDot = function(event){                
+                let w = Math.max(0,this.w0 + this.distanceX);
+                let h = Math.max(0,this.h0 + this.distanceY);
+                // console.log(this.fitElement);
+                
+                let w1 = Math.max(this.minw0,Math.min(w,this.maxw0));
+                let h1 = Math.max(this.minh0,Math.min(h,this.maxh0));
+                console.log(w,w1);
+                
+                this.tool.style.setProperty('--width',w1+'px');
+                this.fitElement.style.width = w1+'px';
+                this.tool.style.setProperty('--height',h1+'px');
+                this.fitElement.style.height = h1+'px';
+                this.fit(this.fitElement)
+            }
+            utt02.onmoveTool = function(event){
+                let l = this.l0 + this.distanceX;
+                let t = this.t0 + this.distanceY;
+                let fel = this.fel0 + this.distanceX;
+                let fet = this.fet0 + this.distanceY;
+                this.tool.style.setProperty('--left',l+'px');
+                this.tool.style.setProperty('--top',t+'px');
+                console.log(fel,this.fel0 , this.distanceX);
+                
+                this.fitElement.style.left = fel+'px';
+                this.fitElement.style.top = fet+'px';
+            }
         })
     </script>
 
@@ -194,6 +235,18 @@
                 <button type="button" class="dot" data-dot="22"></button>
             </div>
 
+            <div id="utt02" class="ui-transform-tool moveable" style="position: absolute; --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+                <!-- <button type="button" class="dot" data-dot="00"></button> -->
+                <!-- <button type="button" class="dot" data-dot="01"></button> -->
+                <!-- <button type="button" class="dot" data-dot="02"></button> -->
+                <!-- <button type="button" class="dot" data-dot="10"></button> -->
+                <!-- <button type="button" class="dot" data-dot="11"></button> -->
+                <button type="button" class="dot" data-dot="12"></button>
+                <!-- <button type="button" class="dot" data-dot="20"></button> -->
+                <button type="button" class="dot" data-dot="21"></button>
+                <button type="button" class="dot" data-dot="22"></button>
+            </div>
+
 
             
         </div>
@@ -207,6 +260,10 @@
                 <div style="flex:1 1 auto;background-color: #dd00cc;" onclick="utt00.fit(this);utt00.fitElement=this;utt00.hide(false);utt00.active()">4</div>
                 <div style="flex:1 1 auto;background-color: #00ddcc;" onclick="utt00.fit(this);utt00.fitElement=this;utt00.hide(false);utt00.active()">5</div>
                 <div style="flex:1 1 auto;background-color: #ddcc00;" onclick="utt00.fit(this);utt00.fitElement=this;utt00.hide(false);utt00.active()">6</div>
+            </div>
+            <hr>
+            <div style="position: relative; height: 600px;;">
+                <img src="asset/bg.gif" style=" position: absolute;top:10px;left:10px; width:400px;height: 400px;" alt="" onclick="utt02.fit(this);utt02.fitElement=this;utt02.hide(false);utt02.active()">
             </div>
             <hr>
             <button type="button" class="btn btn-primary" onclick="utt01.hide(false)">on</button>
