@@ -37,119 +37,88 @@
     
     <!-- //meta og -->
 
+    <link rel="stylesheet" href="asset/ui-transform-tool.css">
+
     <script type="module">
         import UiTransformTool from "./lib/UiTransformTool.js";
         globalThis.UiTransformTool = UiTransformTool;
     </script>
     <script>
         window.addEventListener('load',(event)=>{
+            const utt02 = globalThis.utt02 = new UiTransformTool(document.querySelector('#utt02'))
+
             const utt01 = globalThis.utt01 = new UiTransformTool(document.querySelector('#utt01'))
             utt01.addEventListener();
-
+            utt01.ondown = function(event){
+                this.w0 = parseInt(this.area.style.getPropertyValue('--width'));
+                this.h0 = parseInt(this.area.style.getPropertyValue('--height'));
+                this.l0 = parseInt(this.area.style.getPropertyValue('--left'));
+                this.t0 = parseInt(this.area.style.getPropertyValue('--top'));
+                this.minw0 = parseInt(getComputedStyle(this.area).minWidth);
+                this.minh0 = parseInt(getComputedStyle(this.area).minHeight);
+                this.maxw0 = parseInt(getComputedStyle(this.area).maxWidth);
+                this.maxh0 = parseInt(getComputedStyle(this.area).maxHeight);
+            }
             utt01.ondownArea = function(event){
                 this.x0 = event.x;
                 this.y0 = event.y;
-                this.l0 = parseInt(this.area.style.getPropertyValue('--left'));
-                this.t0 = parseInt(this.area.style.getPropertyValue('--top'));
+
                 console.log(this.area);
                 
             }
             utt01.onmoveArea = function(event){
                 console.log(event);
-                let l = this.l0 + event.x - this.x0;
-                let t = this.t0 + event.y - this.y0;
+                let l = this.l0 + this.distanceX;
+                let t = this.t0 + this.distanceY;
                 this.area.style.setProperty('--left',l+'px');
                 this.area.style.setProperty('--top',t+'px');
             }
 
-            utt01.ondownDot22 = function(event){
-                this.x0 = event.x;
-                this.y0 = event.y;
-                this.w0 = parseInt(this.area.style.getPropertyValue('--width'));
-                this.h0 = parseInt(this.area.style.getPropertyValue('--height'));
-                console.log(this.area);
-                
-            }
+            
             utt01.onmoveDot22 = function(event){
                 console.log(event);
-                let w = Math.max(0,this.w0 + event.x - this.x0);
-                let h = Math.max(0,this.h0 + event.y - this.y0);
+                let w = Math.max(0,this.w0 + this.distanceX);
+                let h = Math.max(0,this.h0 + this.distanceY);
                 this.area.style.setProperty('--width',w+'px');
                 this.area.style.setProperty('--height',h+'px');
+            }
+            utt01.onmoveDot00 = function(event){
+                console.log(event);
+                let w = Math.max(0,this.w0 - this.distanceX);
+                let h = Math.max(0,this.h0 - this.distanceY);
+                if(this.maxw0 >= w && this.minw0 <= w){
+                    this.area.style.setProperty('--width',w+'px');
+                    let l = this.l0 + this.distanceX;    
+                    this.area.style.setProperty('--left',l+'px');
+                }
+                if(this.maxh0 >= h && this.minh0 <= h){ 
+                    this.area.style.setProperty('--height',h+'px');
+                    let t = this.t0 + this.distanceY;
+                    this.area.style.setProperty('--top',t+'px');
+                }
+                
             }
             
         })
     </script>
 
-    <style>
-        .ui-transform-tool-container{
-            --dot-width:10px;
-            --dot-height:10px;
-        }
-        .ui-transform-tool{
-            width:var(--width,100px);
-            height:var(--height,100px);
-            left:var(--left,0px);
-            top:var(--top,0px);
-            border: 1px solid #999999;
-            position: relative;
-        }
-        .ui-transform-tool .dot{
-            width: var(--dot-width);
-            height: var(--dot-height);
-            position: absolute;
-            border: 1px solid #999999;
-            background-color: transparent;
-            display: block;
-            padding:0;margin:0;
-            box-sizing: border-box;
-        }
-        .ui-transform-tool .dot-00{
-            left:calc( var(--dot-width) / 2 * -1 );
-            top:calc( var(--dot-height) / 2 * -1 );
-        }
-        .ui-transform-tool .dot-01{
-            left:calc( 50% - var(--dot-width) / 2 );
-            top:calc( var(--dot-height) / 2 * -1 );
-        }
-        .ui-transform-tool .dot-02{
-            right:calc( var(--dot-width) / 2 * -1 );
-            top:calc( var(--dot-height) / 2 * -1 );
-        }
-        .ui-transform-tool .dot-10{
-            left:calc( var(--dot-width) / 2 * -1 );
-            top:calc( 50% - var(--dot-height) / 2 );
-        }
-        .ui-transform-tool .dot-11{
-            left:calc( 50% - var(--dot-width) / 2 );
-            top:calc( 50% - var(--dot-height) / 2 );
-            display: none;
-        }
-        .ui-transform-tool .dot-12{
-            right:calc( var(--dot-width) / 2 * -1 );
-            top:calc( 50% - var(--dot-height) / 2 );
-        }
-        .ui-transform-tool .dot-20{
-            left:calc( var(--dot-width) / 2 * -1 );
-            bottom:calc( -1 *var(--dot-height) / 2 );
-        }
-        .ui-transform-tool .dot-21{
-            left:calc( 50% - var(--dot-width) / 2 );
-            bottom:calc( -1 *var(--dot-height) / 2 );
-        }
-        .ui-transform-tool .dot-22{
-            right:calc( var(--dot-width) / 2 * -1 );
-            bottom:calc( -1 *var(--dot-height) / 2 );
-            cursor: nwse-resize;
-        }
-        
-    </style>
     
 </head>
 <body>
     <div class="container">
         <h1>ui-transform-tool</h1>
         <div class="ui-transform-tool-container" style="position: relative;">
+            <div id="utt02" class="ui-transform-tool" style="position: absolute; --width: 200px; --height: 300px; --top:100px;--left:100px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+                <button type="button" class="dot dot-00"></button>
+                <button type="button" class="dot dot-01"></button>
+                <button type="button" class="dot dot-02"></button>
+                <button type="button" class="dot dot-10"></button>
+                <button type="button" class="dot dot-11"></button>
+                <button type="button" class="dot dot-12"></button>
+                <button type="button" class="dot dot-20"></button>
+                <button type="button" class="dot dot-21"></button>
+                <button type="button" class="dot dot-22"></button>
+            </div>
             <div id="utt01" class="ui-transform-tool" style="position: absolute; --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
                 <button type="button" class="dot dot-00"></button>
                 <button type="button" class="dot dot-01"></button>
@@ -161,6 +130,9 @@
                 <button type="button" class="dot dot-21"></button>
                 <button type="button" class="dot dot-22"></button>
             </div>
+
+
+            
         </div>
 
     </div>

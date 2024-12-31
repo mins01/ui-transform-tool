@@ -1,0 +1,64 @@
+@charset "utf-8";
+
+.ui-transform-tool-container{
+    --dot-width:10px;
+    --dot-height:10px;
+}
+.ui-transform-tool{
+    width:var(--width,100px);
+    height:var(--height,100px);
+    left:var(--left,0px);
+    top:var(--top,0px);
+    border: 1px solid #999999;
+    position: relative;
+    box-sizing: border-box;
+}
+.ui-transform-tool .dot{
+    width: var(--dot-width);
+    height: var(--dot-height);
+    position: absolute;
+    border: 1px solid #999999;
+    background-color: transparent;
+    display: block;
+    padding:0;margin:0;
+    box-sizing: border-box;
+}
+.ui-transform-tool .dot-00{
+    left:calc( var(--dot-width) / 2 * -1 );
+    top:calc( var(--dot-height) / 2 * -1 );
+    cursor: nwse-resize;
+}
+.ui-transform-tool .dot-01{
+    left:calc( 50% - var(--dot-width) / 2 );
+    top:calc( var(--dot-height) / 2 * -1 );
+}
+.ui-transform-tool .dot-02{
+    right:calc( var(--dot-width) / 2 * -1 );
+    top:calc( var(--dot-height) / 2 * -1 );
+}
+.ui-transform-tool .dot-10{
+    left:calc( var(--dot-width) / 2 * -1 );
+    top:calc( 50% - var(--dot-height) / 2 );
+}
+.ui-transform-tool .dot-11{
+    left:calc( 50% - var(--dot-width) / 2 );
+    top:calc( 50% - var(--dot-height) / 2 );
+    display: none;
+}
+.ui-transform-tool .dot-12{
+    right:calc( var(--dot-width) / 2 * -1 );
+    top:calc( 50% - var(--dot-height) / 2 );
+}
+.ui-transform-tool .dot-20{
+    left:calc( var(--dot-width) / 2 * -1 );
+    bottom:calc( -1 *var(--dot-height) / 2 );
+}
+.ui-transform-tool .dot-21{
+    left:calc( 50% - var(--dot-width) / 2 );
+    bottom:calc( -1 *var(--dot-height) / 2 );
+}
+.ui-transform-tool .dot-22{
+    right:calc( var(--dot-width) / 2 * -1 );
+    bottom:calc( -1 *var(--dot-height) / 2 );
+    cursor: nwse-resize;
+}
