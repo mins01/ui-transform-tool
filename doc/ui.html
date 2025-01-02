@@ -7,26 +7,26 @@
   <meta http-equiv="Content-Style-Type" content="text/css">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <link rel="shortcut icon" href="http://www.mins01.com/favicon.ico"> 
+  <link rel="shortcut icon" href="http://www.mins01.com/favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+
   <script src="/js/ForGoogle.js"></script>
   <!-- google analytics -->
   <script>if(window.ForGoogle){ ForGoogle.analytics() }else{ console.log("failure : ForGoogle.analytics()");}</script>
-  
-  
+
+
   <!-- jquery 관련 -->
-  <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
-  
+  <!-- <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B + OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script> -->
+
   <!-- 부트스트랩 5.3.x -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-  
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script> -->
+
   <!-- vue.js -->
-  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-  
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+
   <!-- meta og -->
-  
+
   <meta property="og:title" content="ui-transform-tool">
   <meta property="og:description" content="ui-transform-tool">
   <meta name="og:image" content="http://www.mins01.com/img/logo.gif">
@@ -34,22 +34,27 @@
   <meta property="og:image:height" content="70" />
   <meta property="og:site_name" content="ui-transform-tool" />
   <meta property="og:type" content="website">
-  
+
   <!-- //meta og -->
-  
+
   <link rel="stylesheet" href="../asset/ui-transform-tool.css">
-  
+
+  <style>
+    .boxes > div{
+      max-width: 320px;;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1>ui-transform-tool</h1>
     <h2>ui</h2>
-    <div class="ui-transform-tool-container">
-      <div class="d-flex gap-3 flex-wrap">
+    <div class="ui-transform-tool-container my-3">
+      <div class="d-flex gap-3 flex-wrap boxes">
         <div>
           <h3>default</h3>
-          <div class="ui-transform-tool " style=" --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
-            <div class="border-box"></div>
+          <div class="ui-transform-tool " style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <div class="outline"></div>
             <button type="button" class="dot" data-dot="00"></button>
             <button type="button" class="dot" data-dot="01"></button>
             <button type="button" class="dot" data-dot="02"></button>
@@ -60,11 +65,31 @@
             <button type="button" class="dot" data-dot="21"></button>
             <button type="button" class="dot" data-dot="22"></button>
           </div>
-        </div>        
+        </div>
+        <div>
+          <h3>no outline</h3>
+          <div class="ui-transform-tool " style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <button type="button" class="dot" data-dot="00"></button>
+            <button type="button" class="dot" data-dot="01"></button>
+            <button type="button" class="dot" data-dot="02"></button>
+            <button type="button" class="dot" data-dot="10"></button>
+            <button type="button" class="dot" data-dot="11"></button>
+            <button type="button" class="dot" data-dot="12"></button>
+            <button type="button" class="dot" data-dot="20"></button>
+            <button type="button" class="dot" data-dot="21"></button>
+            <button type="button" class="dot" data-dot="22"></button>
+          </div>
+        </div>
+        <div>
+          <h3>no dot</h3>
+          <div class="ui-transform-tool " style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <div class="outline"></div>
+          </div>
+        </div>
         <div>
           <h3>moveable</h3>
-          <div class="ui-transform-tool moveable" style=" --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
-            <div class="border-box"></div>
+          <div class="ui-transform-tool moveable" style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <div class="outline"></div>
             <button type="button" class="dot" data-dot="00"></button>
             <button type="button" class="dot" data-dot="01"></button>
             <button type="button" class="dot" data-dot="02"></button>
@@ -77,9 +102,9 @@
           </div>
         </div>
         <div>
-          <h3>transformable</h3>
-          <div class="ui-transform-tool transformable" style=" --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
-            <div class="border-box"></div>
+          <h3>resizable</h3>
+          <div class="ui-transform-tool resizable" style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <div class="outline"></div>
             <button type="button" class="dot" data-dot="00"></button>
             <button type="button" class="dot" data-dot="01"></button>
             <button type="button" class="dot" data-dot="02"></button>
@@ -92,9 +117,9 @@
           </div>
         </div>
         <div>
-          <h3>moveable+transformable</h3>
-          <div class="ui-transform-tool moveable transformable" style=" --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
-            <div class="border-box"></div>
+          <h3>moveable + resizable</h3>
+          <div class="ui-transform-tool moveable resizable" style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <div class="outline"></div>
             <button type="button" class="dot" data-dot="00"></button>
             <button type="button" class="dot" data-dot="01"></button>
             <button type="button" class="dot" data-dot="02"></button>
@@ -107,9 +132,9 @@
           </div>
         </div>
         <div>
-          <h3>moveable+transformable+active</h3>
-          <div class="ui-transform-tool moveable transformable active" style=" --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
-            <div class="border-box"></div>
+          <h3>moveable + resizable + bg-moveable</h3>
+          <div class="ui-transform-tool moveable resizable" style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <div class="outline bg-moveable"></div>
             <button type="button" class="dot" data-dot="00"></button>
             <button type="button" class="dot" data-dot="01"></button>
             <button type="button" class="dot" data-dot="02"></button>
@@ -122,9 +147,9 @@
           </div>
         </div>
         <div>
-          <h3>moveable+active</h3>
-          <div class="ui-transform-tool moveable active" style=" --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
-            <div class="border-box"></div>
+          <h3>moveable + resizable + active</h3>
+          <div class="ui-transform-tool moveable resizable active" style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <div class="outline"></div>
             <button type="button" class="dot" data-dot="00"></button>
             <button type="button" class="dot" data-dot="01"></button>
             <button type="button" class="dot" data-dot="02"></button>
@@ -137,9 +162,9 @@
           </div>
         </div>
         <div>
-          <h3>transformable+active</h3>
-          <div class="ui-transform-tool transformable active" style=" --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
-            <div class="border-box"></div>
+          <h3>moveable + resizable + active + bg-moveable</h3>
+          <div class="ui-transform-tool moveable resizable active" style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <div class="outline bg-moveable"></div>
             <button type="button" class="dot" data-dot="00"></button>
             <button type="button" class="dot" data-dot="01"></button>
             <button type="button" class="dot" data-dot="02"></button>
@@ -152,9 +177,9 @@
           </div>
         </div>
         <div>
-          <h3>active</h3>
-          <div class="ui-transform-tool active" style=" --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
-            <div class="border-box"></div>
+          <h3>moveable + resizable + bg-moveable + disabled</h3>
+          <div class="ui-transform-tool moveable resizable disabled" style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <div class="outline bg-moveable"></div>
             <button type="button" class="dot" data-dot="00"></button>
             <button type="button" class="dot" data-dot="01"></button>
             <button type="button" class="dot" data-dot="02"></button>
@@ -167,9 +192,9 @@
           </div>
         </div>
         <div>
-          <h3>disabled</h3>
-          <div class="ui-transform-tool moveable disabled" style=" --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
-            <div class="border-box"></div>
+          <h3>moveable + resizable + active + bg-moveable + disabled</h3>
+          <div class="ui-transform-tool moveable resizable active disabled" style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <div class="outline bg-moveable"></div>
             <button type="button" class="dot" data-dot="00"></button>
             <button type="button" class="dot" data-dot="01"></button>
             <button type="button" class="dot" data-dot="02"></button>
@@ -181,10 +206,12 @@
             <button type="button" class="dot" data-dot="22"></button>
           </div>
         </div>
+
+
         <div>
           <h3>hide</h3>
-          <div class="ui-transform-tool moveable hide" style=" --width: 300px; --height: 300px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
-            <div class="border-box"></div>
+          <div class="ui-transform-tool moveable hide" style=" --width: 300px; --height: 200px; --top:0px;--left:0px; min-width: 100px; min-height: 100px;max-width: 600px; max-height: 600px;">
+            <div class="outline"></div>
             <button type="button" class="dot" data-dot="00"></button>
             <button type="button" class="dot" data-dot="01"></button>
             <button type="button" class="dot" data-dot="02"></button>
@@ -196,7 +223,7 @@
             <button type="button" class="dot" data-dot="22"></button>
           </div>
         </div>
-      </div>      
+      </div>
     </div>
   </div>
 </body>
