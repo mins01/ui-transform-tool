@@ -6,6 +6,8 @@
     
 }
 .ui-transform-tool{
+    touch-action: none;
+    user-select: none;
     width:var(--width,100px);
     height:var(--height,100px);
     left:var(--left,0px);
@@ -13,7 +15,6 @@
     position: relative;
     box-sizing:border-box;
     z-index: 100;
-    touch-action: none;
     padding:0;margin:0;
     border-width: 0px;
 }
