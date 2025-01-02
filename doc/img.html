@@ -7,13 +7,13 @@
     <meta http-equiv="Content-Style-Type" content="text/css">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="shortcut icon" href="http://www.mins01.com/favicon.ico"> 
+    <link rel="shortcut icon" href="http://www.mins01.com/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <script src="/js/ForGoogle.js"></script>
     <!-- google analytics -->
     <script>if(window.ForGoogle){ ForGoogle.analytics() }else{ console.log("failure : ForGoogle.analytics()");}</script>
-    
+
 
     <!-- jquery 관련 -->
     <!-- <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script> -->
@@ -24,9 +24,9 @@
 
     <!-- vue.js -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
-    
+
     <!-- meta og -->
-    
+
     <meta property="og:title" content="ui-transform-tool">
     <meta property="og:description" content="ui-transform-tool">
     <meta name="og:image" content="http://www.mins01.com/img/logo.gif">
@@ -34,7 +34,7 @@
     <meta property="og:image:height" content="70" />
     <meta property="og:site_name" content="ui-transform-tool" />
     <meta property="og:type" content="website">
-    
+
     <!-- //meta og -->
 
     <link rel="stylesheet" href="../asset/ui-transform-tool.css">
@@ -43,44 +43,50 @@
         window.addEventListener('load',(event)=>{
             const utt01 = globalThis.utt01 = new UiTransformTool(document.querySelector('#utt01'))
             utt01.addEventListener();
-            utt01.ondown = function(event){           
+            utt01.ondown = function(event){
                 if(!this.fitElement){ return; }
                 this.tli = this.getLayoutInfo(this.tool);
                 this.fli = this.getLayoutInfo(this.fitElement);
                 // console.log(this.fli,this.fli);
-                
+
             }
-            utt01.onmoveDot = function(event){                
+            utt01.onmoveDot = function(event){
                 if(!this.fitElement){ return; }
 
                 const dot = this.eventElement.dataset.dot;
                 if(!dot){ return; }
                 const dotV = dot[0];
-                const dotH = dot[1];             
-                
+                const dotH = dot[1];
+
                 if(dotH=="0"){
-                    let width = this.fli.width + (this.distanceX * -1);
+                    let distanceX = this.distanceX;
+                    let width = this.fli.width + (distanceX * -1);
                     width = Math.max(this.tli.minWidth,this.fli.minWidth,Math.min(width,this.tli.maxWidth,this.fli.maxWidth));
+                    distanceX = this.fli.width - width;
                     this.tool.style.setProperty('--width',width+'px');
                     this.fitElement.style.width = width+'px';
-                                       
-                    this.tool.style.setProperty('--left',(this.tli.left + this.distanceX)+'px');
-                    this.fitElement.style.left = (this.fli.left + this.distanceX)+'px';
+
+                    this.tool.style.setProperty('--left',(this.tli.left + distanceX)+'px');
+                    this.fitElement.style.left = (this.fli.left + distanceX)+'px';
                 }else if(dotH=="1"){
                 }else if(dotH=='2'){
-                    let width = this.fli.width + this.distanceX;               
+                    let width = this.fli.width + this.distanceX;
                     width = Math.max(this.tli.minWidth,this.fli.minWidth,Math.min(width,this.tli.maxWidth,this.fli.maxWidth));
                     this.tool.style.setProperty('--width',width+'px');
                     this.fitElement.style.width = width+'px';
                 }
                 if(dotV=="0"){
-                    let height = this.fli.height + (this.distanceY * -1);
+                    let distanceY = this.distanceY;
+                    let height = this.fli.height + (distanceY * -1);
                     height = Math.max(this.tli.minHeight,this.fli.minHeight,Math.min(height,this.tli.maxHeight,this.fli.maxHeight));
+                    distanceY = this.fli.height - height;
+
                     this.tool.style.setProperty('--height',height+'px');
                     this.fitElement.style.height = height+'px';
 
-                    this.tool.style.setProperty('--top',(this.tli.top + this.distanceY)+'px');
-                    this.fitElement.style.top = (this.fli.top + this.distanceY)+'px';
+                    this.tool.style.setProperty('--top',(this.tli.top + distanceY)+'px');
+                    this.fitElement.style.top = (this.fli.top + distanceY)+'px';
+
                 }else if(dotV=="1"){
                 }else if(dotV=="2"){
                     let height = this.fli.height + this.distanceY;
@@ -106,52 +112,53 @@
                 this.fitElement.style.top = fet+'px';
             }
 
-            
+
 
             const utt02 = globalThis.utt02 = new UiTransformTool(document.querySelector('#utt02'))
             utt02.addEventListener();
-            utt02.ondown = function(event){           
+            utt02.ondown = function(event){
                 if(!this.fitElement){ return; }
                 this.tli = this.getLayoutInfo(this.tool);
                 this.fli = this.getLayoutInfo(this.fitElement);
                 // console.log(this.fli,this.fli);
-                
+
             }
-            utt02.onmoveDot = function(event){                
+            utt02.onmoveDot = function(event){
                 if(!this.fitElement){ return; }
 
                 const dot = this.eventElement.dataset.dot;
                 if(!dot){ return; }
                 const dotV = dot[0];
-                const dotH = dot[1];             
-                
+                const dotH = dot[1];
+
                 if(dotH=="0"){
-                    let width = this.fli.width + (this.distanceX * -1);
+                    let distanceX = this.distanceX;
+                    let width = this.fli.width + (distanceX * -1);
                     width = Math.max(this.tli.minWidth,this.fli.minWidth,Math.min(width,this.tli.maxWidth,this.fli.maxWidth));
-                    if(parseFloat(this.fitElement.style.width)!=width){
-                        this.tool.style.setProperty('--width',width+'px');
-                        this.fitElement.style.width = width+'px';
-                                           
-                        this.tool.style.setProperty('--left',(this.tli.left + this.distanceX)+'px');
-                        this.fitElement.style.left = (this.fli.left + this.distanceX)+'px';
-                    }
+                    distanceX = this.fli.width - width;
+                    this.tool.style.setProperty('--width',width+'px');
+                    this.fitElement.style.width = width+'px';
+
+                    this.tool.style.setProperty('--left',(this.tli.left + distanceX)+'px');
+                    this.fitElement.style.left = (this.fli.left + distanceX)+'px';
                 }else if(dotH=="1"){
                 }else if(dotH=='2'){
-                    let width = this.fli.width + this.distanceX;               
+                    let width = this.fli.width + this.distanceX;
                     width = Math.max(this.tli.minWidth,this.fli.minWidth,Math.min(width,this.tli.maxWidth,this.fli.maxWidth));
                     this.tool.style.setProperty('--width',width+'px');
                     this.fitElement.style.width = width+'px';
                 }
                 if(dotV=="0"){
-                    let height = this.fli.height + (this.distanceY * -1);
+                    let distanceY = this.distanceY;
+                    let height = this.fli.height + (distanceY * -1);
                     height = Math.max(this.tli.minHeight,this.fli.minHeight,Math.min(height,this.tli.maxHeight,this.fli.maxHeight));
-                    if(parseFloat(this.fitElement.style.height)!=height){
-                        this.tool.style.setProperty('--height',height+'px');
-                        this.fitElement.style.height = height+'px';
+                    distanceY = this.fli.height - height;
 
-                        this.tool.style.setProperty('--top',(this.tli.top + this.distanceY)+'px');
-                        this.fitElement.style.top = (this.fli.top + this.distanceY)+'px';
-                    }
+                    this.tool.style.setProperty('--height',height+'px');
+                    this.fitElement.style.height = height+'px';
+
+                    this.tool.style.setProperty('--top',(this.tli.top + distanceY)+'px');
+                    this.fitElement.style.top = (this.fli.top + distanceY)+'px';
                 }else if(dotV=="1"){
                 }else if(dotV=="2"){
                     let height = this.fli.height + this.distanceY;
@@ -218,7 +225,7 @@
         </div>
         <div style="position: relative; height: 600px;;">
             <img id="test-image-01" src="../asset/bg.gif" style=" position: absolute;top:10px;left:10px; width:400px;height: 300px;" alt="" onclick="utt01.fit(this);utt01.hide(false);utt01.active()">
-            
+
             <img id="test-image-02" src="../asset/bg.gif" style=" position: absolute;top:400px;left:10px; width:400px;height: 400px;" alt="" onclick="utt02.fit(this);utt02.hide(false);utt02.active()">
         </div>
     </div>
