@@ -37,29 +37,29 @@
   
   <!-- //meta og -->
   
-  <!-- <link rel="stylesheet" href="../asset/ui-transform-tool.css"> -->
-   <style>
-    ui-transform-tool{
-      position: absolute;
-      left:0;top:0;
-      width:100px;height:100px;
-      /* background-color: #aabbcc99; */
+  <link rel="stylesheet" href="../asset/ui-transform-tool.css">
+  <!-- <style>
+  ui-transform-tool{
+    position: absolute;
+    left:0;top:0;
+    width:100px;height:100px;
+    /* background-color: #aabbcc99; */
 
-      /* 
-      --dot-width:20px;
-      --dot-height:20px;
-      --border-color:#ff66ff; 
-      --border-width:3px;
-      */
-      z-index: 10;
-    }
-    ui-transform-tool[disabled]{
-      filter: grayscale(1);
-    }
-    ui-transform-tool.active{
-      z-index: 19;
-    }
-   </style>
+    /* 
+    --resizer-width:20px;
+    --resizer-height:20px;
+    --border-color:#ff66ff; 
+    --border-width:3px;
+    */
+    z-index: 10;
+  }
+  ui-transform-tool[disabled]{
+    filter: grayscale(1);
+  }
+  ui-transform-tool.active{
+    z-index: 19;
+  }
+  </style> -->
   <script src="../lib/UiTransformToolElement.js"></script>
   <script>
     UiTransformToolElement.defineCustomElements();
@@ -69,33 +69,69 @@
   <div class="container">
     <h1>ui-transform-tool</h1>
     <h2>ex</h2>
-    <div class="ui-transform-tool-container my-3">
-      <ui-transform-tool class="moveable resizable" id="test01" width="300" height="100" left="100" top="100" onpointerdown="this.active()">
-      </ui-transform-tool>
-      <ui-transform-tool class="moveable" id="test02" width="300" height="100" left="100" top="200" onpointerdown="this.active()">
-      </ui-transform-tool>
-      <ui-transform-tool class="" id="test03" width="300" height="100" left="100" top="300" onpointerdown="this.active()">
-      </ui-transform-tool>
-      <ui-transform-tool class="moveable resizable" disabled id="test01" width="300" height="100" left="100" top="400" onpointerdown="this.active()">
-      </ui-transform-tool>
+    <div class="ui-transform-tool-container my-3" >
+      <div class="d-flex flex-wrap gap-3" style="font-size: 14px;">
+        <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
+          moveable resizable active
+          <ui-transform-tool moveable resizable active id="test01" width="100" height="80" left="10" top="10" onpointerdown="this.activate()" onpointermove="if(this.distanceX!==null && this.distanceY!==null) console.log(this.distanceX,this.distanceY)"></ui-transform-tool>
+        </div>
+        <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
+          moveable
+          <ui-transform-tool moveable id="test02" width="100" height="80" left="10" top="10" onpointerdown="this.activate()"></ui-transform-tool>
+        </div>
+        <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
+          [empty]
+          <ui-transform-tool id="test03" width="100" height="80" left="10" top="10" onpointerdown="this.activate()"></ui-transform-tool>
+        </div>
+        <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
+          moveable resizable disabled
+          <ui-transform-tool moveable resizable disabled width="100" height="80" left="10" top="10" onpointerdown="this.activate()"></ui-transform-tool>
+        </div>
+        <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
+          minwidth="20" minheight="20" maxwidth="300" maxheight="300"
+          <ui-transform-tool moveable resizable width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+        </div>
+        <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
+          --resizer-width:20px;
+            --resizer-height:20px;
+            --border-color:#ff66ff; 
+            --border-width:5px;
+          <ui-transform-tool moveable resizable width="100" height="80" left="10" top="10" onpointerdown="this.activate()"
+            style="--resizer-width:20px;
+            --resizer-height:20px;
+            --border-color:#ff66ff; 
+            --border-width:5px;"
+            >
+          </ui-transform-tool>
+        </div>
+        <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
+          hide-mover="mover"
+          <ui-transform-tool moveable resizable hide-mover="mover" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+        </div>
+        <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
+          hide-resizer="00 02 20 22"
+          <ui-transform-tool moveable resizable hide-resizer="00 02 20 22" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+        </div>
+        <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
+          hide-resizer="01 10 12 21"
+          <ui-transform-tool moveable resizable hide-resizer="01 10 12 21" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+        </div>
+        <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
+          hide-resizer="*"
+          <ui-transform-tool moveable resizable hide-resizer="*" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+        </div>
+      </div>
 
-      <ui-transform-tool class="moveable resizable" id="test01" width="300" height="100" left="100" top="500" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.active()">
-      </ui-transform-tool>
 
-      <ui-transform-tool class="moveable resizable" id="test01" width="300" height="100" left="100" top="600" onpointerdown="this.active()"
-        style="--dot-width:20px;
-        --dot-height:20px;
-        --border-color:#ff66ff; 
-        --border-width:5px;"
-        >
-      </ui-transform-tool>
+
+      
       
     </div>
     <script>
       const test01 = document.querySelector('#test01');
-      test01.width = 100;
-      test01.height = 100;
-      test01.left = 50;
+      test01.width = 120;
+      test01.height = 140;
+      test01.left = 100;
       test01.top = 50;
       
     </script>
