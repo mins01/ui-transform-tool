@@ -18,14 +18,14 @@
     border-width: 0px;
 }
 
-.ui-transform-tool .outline{
+.ui-transform-tool .tool-body{
     position: absolute;
     border: 1px solid #0066ff;
     left:0;top:0;right:0;bottom:0;
     z-index: 1;
 }
 
-.ui-transform-tool .dot{
+.ui-transform-tool .tool-dot{
     width: var(--dot-width);
     height: var(--dot-height);
     position: absolute;
@@ -38,41 +38,41 @@
 }
 
 
-.ui-transform-tool .dot[data-dot="00"]{
+.ui-transform-tool .tool-dot[data-dot="00"]{
     left:calc( var(--dot-width) / 2 * -1 );
     top:calc( var(--dot-height) / 2 * -1 );
     cursor: nwse-resize;
 }
-.ui-transform-tool .dot[data-dot="01"]{
+.ui-transform-tool .tool-dot[data-dot="01"]{
     left:calc( 50% - var(--dot-width) / 2 );
     top:calc( var(--dot-height) / 2 * -1 );
 }
-.ui-transform-tool .dot[data-dot="02"]{
+.ui-transform-tool .tool-dot[data-dot="02"]{
     right:calc( var(--dot-width) / 2 * -1 );
     top:calc( var(--dot-height) / 2 * -1 );
 }
-.ui-transform-tool .dot[data-dot="10"]{
+.ui-transform-tool .tool-dot[data-dot="10"]{
     left:calc( var(--dot-width) / 2 * -1 );
     top:calc( 50% - var(--dot-height) / 2 );
 }
-.ui-transform-tool .dot[data-dot="11"]{
+.ui-transform-tool .tool-dot[data-dot="11"]{
     left:calc( 50% - var(--dot-width) / 2 );
     top:calc( 50% - var(--dot-height) / 2 );
     display: none;
 }
-.ui-transform-tool .dot[data-dot="12"]{
+.ui-transform-tool .tool-dot[data-dot="12"]{
     right:calc( var(--dot-width) / 2 * -1 );
     top:calc( 50% - var(--dot-height) / 2 );
 }
-.ui-transform-tool .dot[data-dot="20"]{
+.ui-transform-tool .tool-dot[data-dot="20"]{
     left:calc( var(--dot-width) / 2 * -1 );
     bottom:calc( -1 *var(--dot-height) / 2 );
 }
-.ui-transform-tool .dot[data-dot="21"]{
+.ui-transform-tool .tool-dot[data-dot="21"]{
     left:calc( 50% - var(--dot-width) / 2 );
     bottom:calc( -1 *var(--dot-height) / 2 );
 }
-.ui-transform-tool .dot[data-dot="22"]{
+.ui-transform-tool .tool-dot[data-dot="22"]{
     right:calc( var(--dot-width) / 2 * -1 );
     bottom:calc( -1 *var(--dot-height) / 2 );
     
@@ -82,23 +82,23 @@
 
 
 /* cursor */
-.ui-transform-tool .dot[data-dot]{ cursor: default; }
-.ui-transform-tool .outline{ cursor: default; }
+.ui-transform-tool .tool-dot[data-dot]{ cursor: default; }
+.ui-transform-tool .tool-body{ cursor: default; }
 
-.ui-transform-tool.moveable .outline{ cursor: move; }
+.ui-transform-tool.moveable .tool-body{ cursor: move; }
 
-.ui-transform-tool.resizable .dot[data-dot="00"]{ cursor: nwse-resize; }
-.ui-transform-tool.resizable .dot[data-dot="01"]{ cursor: n-resize;  }
-.ui-transform-tool.resizable .dot[data-dot="02"]{ cursor: nesw-resize;  }
-.ui-transform-tool.resizable .dot[data-dot="10"]{ cursor: e-resize;  }
-.ui-transform-tool.resizable .dot[data-dot="11"]{ cursor: not-allowed;  }
-.ui-transform-tool.resizable .dot[data-dot="12"]{ cursor: e-resize;  }
-.ui-transform-tool.resizable .dot[data-dot="20"]{ cursor: nesw-resize;  }
-.ui-transform-tool.resizable .dot[data-dot="21"]{ cursor: n-resize;   }
-.ui-transform-tool.resizable .dot[data-dot="22"]{ cursor: nwse-resize; }
+.ui-transform-tool.resizable .tool-dot[data-dot="00"]{ cursor: nwse-resize; }
+.ui-transform-tool.resizable .tool-dot[data-dot="01"]{ cursor: n-resize;  }
+.ui-transform-tool.resizable .tool-dot[data-dot="02"]{ cursor: nesw-resize;  }
+.ui-transform-tool.resizable .tool-dot[data-dot="10"]{ cursor: e-resize;  }
+.ui-transform-tool.resizable .tool-dot[data-dot="11"]{ cursor: not-allowed;  }
+.ui-transform-tool.resizable .tool-dot[data-dot="12"]{ cursor: e-resize;  }
+.ui-transform-tool.resizable .tool-dot[data-dot="20"]{ cursor: nesw-resize;  }
+.ui-transform-tool.resizable .tool-dot[data-dot="21"]{ cursor: n-resize;   }
+.ui-transform-tool.resizable .tool-dot[data-dot="22"]{ cursor: nwse-resize; }
 
-.ui-transform-tool.disabled .outline{ cursor: not-allowed; }
-.ui-transform-tool.disabled .dot[data-dot]{ cursor: not-allowed; }
+.ui-transform-tool.disabled .tool-body{ cursor: not-allowed; }
+.ui-transform-tool.disabled .tool-dot[data-dot]{ cursor: not-allowed; }
 
 
 /* background image */
@@ -117,10 +117,10 @@
 .ui-transform-tool{
     opacity: 1;
 }
-.ui-transform-tool .dot{
+.ui-transform-tool .tool-dot{
     filter:grayscale(1) opacity(0.2);
 }
-.ui-transform-tool .outline{
+.ui-transform-tool .tool-body{
     filter:grayscale(1) opacity(0.2);
 }
 .ui-transform-tool.active{
@@ -128,17 +128,17 @@
     z-index: 109;
     opacity: 1;
 }
-.ui-transform-tool.active.resizable .dot{
+.ui-transform-tool.active.resizable .tool-dot{
     filter:none;
 }
-.ui-transform-tool.active.moveable .outline{
+.ui-transform-tool.active.moveable .tool-body{
     filter:none;
 }
-.ui-transform-tool.disabled .dot{
+.ui-transform-tool.disabled .tool-dot{
     filter:grayscale(1) opacity(0.2);
     border: 1px dashed #0066ff;
 }
-.ui-transform-tool.disabled .outline{
+.ui-transform-tool.disabled .tool-body{
     filter:grayscale(1) opacity(0.2);
     border: 1px dashed #0066ff;
 }
