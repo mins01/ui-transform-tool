@@ -6,7 +6,6 @@
     
 }
 .ui-transform-tool{
-    touch-action: none;
     user-select: none;
     width:var(--width,100px);
     height:var(--height,100px);
@@ -124,16 +123,16 @@
 .ui-transform-tool .outline{
     filter:grayscale(1) opacity(0.2);
 }
+.ui-transform-tool.active{
+    touch-action: none;
+    z-index: 109;
+    opacity: 1;
+}
 .ui-transform-tool.active.resizable .dot{
     filter:none;
 }
 .ui-transform-tool.active.moveable .outline{
     filter:none;
-}
-
-.ui-transform-tool.active{
-    z-index: 109;
-    opacity: 1;
 }
 .ui-transform-tool.disabled .dot{
     filter:grayscale(1) opacity(0.2);
