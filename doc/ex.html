@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko" >
+<head>
+  <title>ui-transform-tool</title>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Script-Type" content="text/javascript">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="shortcut icon" href="http://www.mins01.com/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <script src="/js/ForGoogle.js"></script>
+  <!-- google analytics -->
+  <script>if(window.ForGoogle){ ForGoogle.analytics() }else{ console.log("failure : ForGoogle.analytics()");}</script>
+  
+  
+  <!-- jquery 관련 -->
+  <!-- <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B + OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script> -->
+  
+  <!-- 부트스트랩 5.3.x -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script> -->
+  
+  <!-- vue.js -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+  
+  <!-- meta og -->
+  
+  <meta property="og:title" content="ui-transform-tool">
+  <meta property="og:description" content="ui-transform-tool">
+  <meta name="og:image" content="http://www.mins01.com/img/logo.gif">
+  <meta property="og:image:width" content="190">
+  <meta property="og:image:height" content="70" />
+  <meta property="og:site_name" content="ui-transform-tool" />
+  <meta property="og:type" content="website">
+  
+  <!-- //meta og -->
+  
+  <!-- <link rel="stylesheet" href="../asset/ui-transform-tool.css"> -->
+   <style>
+    ui-transform-tool{
+      position: absolute;
+      left:0;top:0;
+      width:100px;height:100px;
+      /* background-color: #aabbcc99; */
+
+      /* 
+      --dot-width:20px;
+      --dot-height:20px;
+      --border-color:#ff66ff; 
+      --border-width:3px;
+      */
+      z-index: 10;
+    }
+    ui-transform-tool[disabled]{
+      filter: grayscale(1);
+    }
+    ui-transform-tool.active{
+      z-index: 19;
+    }
+   </style>
+  <script src="../lib/UiTransformToolElement.js"></script>
+  <script>
+    UiTransformToolElement.defineCustomElements();
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>ui-transform-tool</h1>
+    <h2>ex</h2>
+    <div class="ui-transform-tool-container my-3">
+      <ui-transform-tool class="moveable resizable" id="test01" width="300" height="100" left="100" top="100" onpointerdown="this.active()">
+      </ui-transform-tool>
+      <ui-transform-tool class="moveable" id="test02" width="300" height="100" left="100" top="200" onpointerdown="this.active()">
+      </ui-transform-tool>
+      <ui-transform-tool class="" id="test03" width="300" height="100" left="100" top="300" onpointerdown="this.active()">
+      </ui-transform-tool>
+      <ui-transform-tool class="moveable resizable" disabled id="test01" width="300" height="100" left="100" top="400" onpointerdown="this.active()">
+      </ui-transform-tool>
+
+      <ui-transform-tool class="moveable resizable" id="test01" width="300" height="100" left="100" top="500" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.active()">
+      </ui-transform-tool>
+
+      <ui-transform-tool class="moveable resizable" id="test01" width="300" height="100" left="100" top="600" onpointerdown="this.active()"
+        style="--dot-width:20px;
+        --dot-height:20px;
+        --border-color:#ff66ff; 
+        --border-width:5px;"
+        >
+      </ui-transform-tool>
+      
+    </div>
+    <script>
+      const test01 = document.querySelector('#test01');
+      test01.width = 100;
+      test01.height = 100;
+      test01.left = 50;
+      test01.top = 50;
+      
+    </script>
+  </div>
+</body>
+</html>
