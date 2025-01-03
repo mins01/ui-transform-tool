@@ -3,6 +3,8 @@
 .ui-transform-tool-container{
     --dot-width:10px;
     --dot-height:10px;
+    --dot-background-color:#ffffff80;
+    --border-width:1px;
     
 }
 .ui-transform-tool{
@@ -20,7 +22,7 @@
 
 .ui-transform-tool .tool-body{
     position: absolute;
-    border: 1px solid #0066ff;
+    border: var(--border-width) solid #0066ff;
     left:0;top:0;right:0;bottom:0;
     z-index: 1;
 }
@@ -29,8 +31,8 @@
     width: var(--dot-width);
     height: var(--dot-height);
     position: absolute;
-    border: 1px solid #0066ff;
-    background-color: transparent;
+    border: var(--border-width) solid #0066ff;
+    background-color: var(--dot-background-color);
     display: block;
     padding:0;margin:0;
     box-sizing: border-box;
