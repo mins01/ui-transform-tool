@@ -46,9 +46,9 @@
     /* background-color: #aabbcc99; */
 
     /* 
-    --thandle-width:10px;
-    --thandle-height:10px;
-    --thandle-border-radius:0px
+    --handle-width:10px;
+    --handle-height:10px;
+    --handle-border-radius:0px
     --border-color:#ff66ff; 
     --border-width:3px;
     */
@@ -65,11 +65,11 @@
     ui-transform-tool.test-part::part(bounding-box) {
       background-color: black;
     }
-    ui-transform-tool.test-part::part(transform-handle) {
+    ui-transform-tool.test-part::part(handle) {
       background-color: red;
       border-radius: 100vmax;
     }
-    ui-transform-tool.test-part::part(transform-handle-01){
+    ui-transform-tool.test-part::part(handle-01){
       transform:scale(4)
     }
   </style>
@@ -105,35 +105,35 @@
           <ui-transform-tool moveable resizable width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
-          --thandle-width:20px;
-            --thandle-height:20px;
-            --thandle-border-radius:100vmax;
+          --handle-width:20px;
+            --handle-height:20px;
+            --handle-border-radius:100vmax;
             --border-color:#ff66ff; 
             --border-width:5px;
           <ui-transform-tool moveable resizable width="100" height="80" left="10" top="10" onpointerdown="this.activate()"
-            style="--thandle-width:20px;
-            --thandle-height:20px;
-            --thandle-border-radius:100vmax;
+            style="--handle-width:20px;
+            --handle-height:20px;
+            --handle-border-radius:100vmax;
             --border-color:#ff66ff; 
             --border-width:5px;"
             >
           </ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
-          hide-mover="mover"
-          <ui-transform-tool moveable resizable hide-mover="mover" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+          hide-box="box"
+          <ui-transform-tool moveable resizable hide-box="box" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
-          hide-resizer="00 02 20 22"
-          <ui-transform-tool moveable resizable hide-resizer="00 02 20 22" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+          hide-handle="00 02 20 22"
+          <ui-transform-tool moveable resizable hide-handle="00 02 20 22" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
-          hide-resizer="01 10 12 21"
-          <ui-transform-tool moveable resizable hide-resizer="01 10 12 21" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+          hide-handle="01 10 12 21"
+          <ui-transform-tool moveable resizable hide-handle="01 10 12 21" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
-          hide-resizer="*"
-          <ui-transform-tool moveable resizable hide-resizer="*" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+          hide-handle="*"
+          <ui-transform-tool moveable resizable hide-handle="*" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           ui-transform-tool.test-part::part(???)
