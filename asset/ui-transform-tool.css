@@ -18,16 +18,16 @@ ui-transform-tool[active]{
     z-index: 19;
 }
 
-ui-transform-tool[running="mover"]{
+ui-transform-tool[running="bbox"]{
     cursor: move;
 }
 
-ui-transform-tool[running="resizer"][data-resizer="00"]{ cursor: nwse-resize; }
-ui-transform-tool[running="resizer"][data-resizer="01"]{ cursor: ns-resize;  }
-ui-transform-tool[running="resizer"][data-resizer="02"]{ cursor: nesw-resize;  }
-ui-transform-tool[running="resizer"][data-resizer="10"]{ cursor: ew-resize;  }
-ui-transform-tool[running="resizer"][data-resizer="11"]{ cursor: not-allowed;  }
-ui-transform-tool[running="resizer"][data-resizer="12"]{ cursor: ew-resize;  }
-ui-transform-tool[running="resizer"][data-resizer="20"]{ cursor: nesw-resize;  }
-ui-transform-tool[running="resizer"][data-resizer="21"]{ cursor: ns-resize;   }
-ui-transform-tool[running="resizer"][data-resizer="22"]{ cursor: nwse-resize; }
+ui-transform-tool[running="thandle"][data-thandle="00"]{ cursor: nwse-resize; }
+ui-transform-tool[running="thandle"][data-thandle="01"]{ cursor: ns-resize;  }
+ui-transform-tool[running="thandle"][data-thandle="02"]{ cursor: nesw-resize;  }
+ui-transform-tool[running="thandle"][data-thandle="10"]{ cursor: ew-resize;  }
+ui-transform-tool[running="thandle"][data-thandle="11"]{ cursor: not-allowed;  }
+ui-transform-tool[running="thandle"][data-thandle="12"]{ cursor: ew-resize;  }
+ui-transform-tool[running="thandle"][data-thandle="20"]{ cursor: nesw-resize;  }
+ui-transform-tool[running="thandle"][data-thandle="21"]{ cursor: ns-resize;   }
+ui-transform-tool[running="thandle"][data-thandle="22"]{ cursor: nwse-resize; }
