@@ -4,8 +4,9 @@ ui-transform-tool{
     --handle-width:10px;
     --handle-height:10px;
     --handle-border-radius:0px;
+    --border-color:#999999;
     --active-border-color:#0066ff;
-    --border-color:#cccccc;
+    --disabled-border-color:#cccccc;
     --border-width:1px;
 
     position: absolute;
@@ -20,18 +21,6 @@ ui-transform-tool[disabled]{
 ui-transform-tool[active]{
     z-index: 19;
 }
-ui-transform-tool[disabled]::part(bounding-box) {
-    /* background-color: black;
-    background-image: url(bg.gif); */
-    --border-width: #999999;
-}
-ui-transform-tool[disabled]::part(handle) {
-    /* background-color: red;
-    border-radius: 100vmax; */
-    --border-width: #999999;
-
-}
-
 
 ui-transform-tool[running="bounding-box"]{
     cursor: move;

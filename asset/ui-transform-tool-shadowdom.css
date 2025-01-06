@@ -9,7 +9,8 @@
     --handle-height:10px;
     --handle-border-radius:0px
     --active-border-color:#0066ff;
-    --border-color:#cccccc;
+    --border-color:#999999;
+    --disabled-border-color:#cccccc;
     --border-width:1px;
     */
     width: 100%;
@@ -71,16 +72,19 @@
 
 /* status */
 .container :where(.box, .handle){
-    /* filter: grayscale(1); */
+
 }
 .container[active][moveable] .box{
     --border-color: var(--active-border-color,#0066ff);
-    /* filter: none; */
 }
 .container[active][resizable] .handle{
-    /* filter: none; */
     --border-color: var(--active-border-color,#0066ff);
-
+}
+.container[disabled][moveable] .box{
+    --border-color: var(--disabled-border-color,#cccccc);
+}
+.container[disabled][resizable] .handle{
+    --border-color: var(--disabled-border-color,#cccccc);
 }
 
 
