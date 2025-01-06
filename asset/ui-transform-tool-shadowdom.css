@@ -8,7 +8,8 @@
     --handle-width:10px;
     --handle-height:10px;
     --handle-border-radius:0px
-    --border-color:#0066ff;
+    --active-border-color:#0066ff;
+    --border-color:#cccccc;
     --border-width:1px;
     */
     width: 100%;
@@ -33,13 +34,13 @@
     height: 100%;
     padding: 0;
     margin: 0;
-    border:var(--border-width,1px) solid var(--border-color,#0066ff);
+    border:var(--border-width,1px) solid var(--border-color,#cccccc);
 }
 .handle{
     width: var(--handle-width,10px);
     height: var(--handle-height,10px);
     border-radius: var(--handle-border-radius,0px);
-    border:var(--border-width,1px) solid var(--border-color,#0066ff);
+    border:var(--border-width,1px) solid var(--border-color,#cccccc);
     background-color: #fff;
     position: absolute;
     box-sizing: border-box;
@@ -70,13 +71,16 @@
 
 /* status */
 .container :where(.box, .handle){
-    filter: brightness(2) grayscale(1);
+    /* filter: grayscale(1); */
 }
 .container[active][moveable] .box{
-    filter: none;
+    --border-color: var(--active-border-color,#0066ff);
+    /* filter: none; */
 }
 .container[active][resizable] .handle{
-    filter: none;
+    /* filter: none; */
+    --border-color: var(--active-border-color,#0066ff);
+
 }
 
 

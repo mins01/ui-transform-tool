@@ -1,23 +1,37 @@
 @charset "utf-8";
 
 ui-transform-tool{
-    /* 
-    --dot-width:20px;
-    --dot-height:20px;
-    --border-color:#ff66ff; 
-    --border-width:3px;
-    */
+    --handle-width:10px;
+    --handle-height:10px;
+    --handle-border-radius:0px;
+    --active-border-color:#0066ff;
+    --border-color:#cccccc;
+    --border-width:1px;
+
     position: absolute;
     left:0;top:0;
     width:100px;height:100px;
     z-index: 10;
 }
 ui-transform-tool[disabled]{
-    filter: grayscale(1) brightness(1.3);
+    /* filter: grayscale(1) brightness(0.5); */
+    z-index: 1;
 }
 ui-transform-tool[active]{
     z-index: 19;
 }
+ui-transform-tool[disabled]::part(bounding-box) {
+    /* background-color: black;
+    background-image: url(bg.gif); */
+    --border-width: #999999;
+}
+ui-transform-tool[disabled]::part(handle) {
+    /* background-color: red;
+    border-radius: 100vmax; */
+    --border-width: #999999;
+
+}
+
 
 ui-transform-tool[running="bounding-box"]{
     cursor: move;
