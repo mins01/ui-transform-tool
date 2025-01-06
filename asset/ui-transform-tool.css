@@ -14,6 +14,8 @@ ui-transform-tool{
     z-index: 10;
 
     display: inline-block;
+
+    touch-action: none;
 }
 ui-transform-tool[disabled]{
     z-index: 1;

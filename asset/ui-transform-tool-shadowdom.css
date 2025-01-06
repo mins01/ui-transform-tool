@@ -17,10 +17,6 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-
-
-
-    touch-action: none;
 }
 .wrap{
     width: 100%;
@@ -34,7 +30,7 @@
     height: 100%;
     padding: 0;
     margin: 0;
-    border:var(--border-width,1px) solid var(--border-color,#cccccc);
+    border:var(--border-width,1px) solid var(--border-color,ButtonBorder);
 }
 .handle{
     --handle-width-gap:calc( ( var(--handle-width,10px) - var(--border-width,1px) ) / 2);
@@ -43,7 +39,7 @@
     width: var(--handle-width,10px);
     height: var(--handle-height,10px);
     border-radius: var(--handle-border-radius,0px);
-    border:var(--border-width,1px) solid var(--border-color,#cccccc);
+    border:var(--border-width,1px) solid var(--border-color,ButtonBorder);
     background-color: #fff;
     position: absolute;
     box-sizing: border-box;
@@ -77,10 +73,10 @@
 
 }
 .container[disabled][moveable] .box{
-    --border-color: var(--disabled-border-color,#cccccc);
+    --border-color: var(--disabled-border-color,GrayText);
 }
 .container[disabled][resizable] .handle{
-    --border-color: var(--disabled-border-color,#cccccc);
+    --border-color: var(--disabled-border-color,GrayText);
 }
 
 
