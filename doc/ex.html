@@ -38,29 +38,7 @@
   <!-- //meta og -->
   
   <link rel="stylesheet" href="../asset/ui-transform-tool.css">
-  <!-- <style>
-  ui-transform-tool{
-    position: absolute;
-    left:0;top:0;
-    width:100px;height:100px;
-    /* background-color: #aabbcc99; */
 
-    /* 
-    --handle-width:10px;
-    --handle-height:10px;
-    --handle-border-radius:0px
-    --border-color:#ff66ff; 
-    --border-width:3px;
-    */
-    z-index: 10;
-  }
-  ui-transform-tool[disabled]{
-    filter: grayscale(1);
-  }
-  ui-transform-tool.active{
-    z-index: 19;
-  }
-  </style> -->
   <style>
     ui-transform-tool.test-part::part(bounding-box) {
       background-color: black;
@@ -92,8 +70,8 @@
     <div class="ui-transform-tool-container my-3" >
       <div class="d-flex flex-wrap gap-3" style="font-size: 14px;">
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
-          moveable resizable active
-          <ui-transform-tool moveable resizable active id="test01" width="100" height="80" left="10" top="10"  onpointermove="if(this.distanceX!==null && this.distanceY!==null) console.log(this.distanceX,this.distanceY)"></ui-transform-tool>
+          moveable resizable
+          <ui-transform-tool moveable resizable id="test01" width="100" height="80" left="10" top="10"  onpointermove="if(this.distanceX!==null && this.distanceY!==null) console.log(this.distanceX,this.distanceY)"></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           moveable
@@ -115,14 +93,12 @@
           --handle-width:20px;
             --handle-height:20px;
             --handle-border-radius:100vmax;
-            --active-border-color:#ff0000;
             --border-color:#ff66ff; 
             --border-width:5px;
           <ui-transform-tool moveable resizable width="100" height="80" left="10" top="10" 
             style="--handle-width:20px;
             --handle-height:20px;
             --handle-border-radius:100vmax;
-            --active-border-color:#ff0000;
             --border-color:#ff66ff; 
             --border-width:5px;"
             >
