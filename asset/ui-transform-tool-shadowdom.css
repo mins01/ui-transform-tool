@@ -9,7 +9,6 @@
     --handle-height:10px;
     --handle-border-radius:0px
     --border-color:#999999;
-    --disabled-border-color:#cccccc;
     --border-width:1px;
     */
     width: 100%;
@@ -72,31 +71,20 @@
 .container :where(.box, .handle){
 
 }
-.container[disabled][moveable] .box{
-    --border-color: var(--disabled-border-color,GrayText);
-}
-.container[disabled][resizable] .handle{
-    --border-color: var(--disabled-border-color,GrayText);
-}
-
-
-
 
 /* cursor */
-.handle{ cursor: default; }
-.box{ cursor: default; }
+.handle{ cursor: inherit; }
+.box{ cursor: inherit; }
 
-.container[moveable] .box{ cursor: move; }
+.container[moveable]:not([disabled]) .box{ cursor: move; }
 
-.container[resizable] .handle[data-handle="00"]{ cursor: nwse-resize; }
-.container[resizable] .handle[data-handle="01"]{ cursor: ns-resize;  }
-.container[resizable] .handle[data-handle="02"]{ cursor: nesw-resize;  }
-.container[resizable] .handle[data-handle="10"]{ cursor: ew-resize;  }
-.container[resizable] .handle[data-handle="11"]{ cursor: not-allowed;  }
-.container[resizable] .handle[data-handle="12"]{ cursor: ew-resize;  }
-.container[resizable] .handle[data-handle="20"]{ cursor: nesw-resize;  }
-.container[resizable] .handle[data-handle="21"]{ cursor: ns-resize;   }
-.container[resizable] .handle[data-handle="22"]{ cursor: nwse-resize; }
+.container[resizable]:not([disabled]) .handle[data-handle="00"]{ cursor: nwse-resize; }
+.container[resizable]:not([disabled]) .handle[data-handle="01"]{ cursor: ns-resize;  }
+.container[resizable]:not([disabled]) .handle[data-handle="02"]{ cursor: nesw-resize;  }
+.container[resizable]:not([disabled]) .handle[data-handle="10"]{ cursor: ew-resize;  }
+.container[resizable]:not([disabled]) .handle[data-handle="11"]{ cursor: not-allowed;  }
+.container[resizable]:not([disabled]) .handle[data-handle="12"]{ cursor: ew-resize;  }
+.container[resizable]:not([disabled]) .handle[data-handle="20"]{ cursor: nesw-resize;  }
+.container[resizable]:not([disabled]) .handle[data-handle="21"]{ cursor: ns-resize;   }
+.container[resizable]:not([disabled]) .handle[data-handle="22"]{ cursor: nwse-resize; }
 
-.container[disabled] .box{ cursor: not-allowed; }
-.container[disabled] .handle[data-handle]{ cursor: not-allowed; }

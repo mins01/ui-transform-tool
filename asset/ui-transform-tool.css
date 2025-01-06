@@ -16,9 +16,11 @@ ui-transform-tool{
     display: inline-block;
 
     touch-action: none;
+    user-select: none;
 }
+
 ui-transform-tool[disabled]{
-    z-index: 1;
+    --border-color:#cccccc;
 }
 
 ui-transform-tool[running="bounding-box"]{
@@ -34,6 +36,11 @@ ui-transform-tool[running="handle"][data-handle="12"]{ cursor: ew-resize;  }
 ui-transform-tool[running="handle"][data-handle="20"]{ cursor: nesw-resize;  }
 ui-transform-tool[running="handle"][data-handle="21"]{ cursor: ns-resize;   }
 ui-transform-tool[running="handle"][data-handle="22"]{ cursor: nwse-resize; }
+
+
+ui-transform-tool[disabled]{
+    cursor: not-allowed;
+}
 
 /* 
 커스텀용 안내 주석
