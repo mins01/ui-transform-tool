@@ -59,9 +59,15 @@
         <hr>
         <h2>ex</h2>
         <div>
-            <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10" style="position: static;"></ui-transform-tool>
-            <ui-transform-tool active resizable moveable  width="100" height="100" left="10" top="110" maxwidth="200" maxheight="200" onpointerdown="this.activate()"></ui-transform-tool>
-            <ui-transform-tool resizable moveable  width="100" height="100" left="110" top="110"  maxwidth="200" maxheight="200" onpointerdown="this.activate()"></ui-transform-tool>
+            <div>
+                <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10"  maxwidth="200" maxheight="200" style="position: static;"></ui-transform-tool>
+            </div>
+            <div>
+                <ui-transform-tool active resizable moveable  width="100" height="100" left="10" top="10" maxwidth="200" maxheight="200" ></ui-transform-tool>
+            </div>
+            <div style="position: relative;">
+                <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10"  maxwidth="200" maxheight="200" ></ui-transform-tool>
+            </div>
         </div>
     </div>
 </body>

@@ -73,6 +73,11 @@
     ui-transform-tool.test-part::part(handle-01){
       transform:scale(4)
     }
+    ui-transform-tool.active{
+      --border-color:#0066cc;
+      z-index: 19;
+    }
+    
   </style>
   <script src="../lib/UiTransformToolElement.js"></script>
   <script>
@@ -88,23 +93,23 @@
       <div class="d-flex flex-wrap gap-3" style="font-size: 14px;">
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           moveable resizable active
-          <ui-transform-tool moveable resizable active id="test01" width="100" height="80" left="10" top="10" onpointerdown="this.activate()" onpointermove="if(this.distanceX!==null && this.distanceY!==null) console.log(this.distanceX,this.distanceY)"></ui-transform-tool>
+          <ui-transform-tool moveable resizable active id="test01" width="100" height="80" left="10" top="10"  onpointermove="if(this.distanceX!==null && this.distanceY!==null) console.log(this.distanceX,this.distanceY)"></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           moveable
-          <ui-transform-tool moveable id="test02" width="100" height="80" left="10" top="10" onpointerdown="this.activate()"></ui-transform-tool>
+          <ui-transform-tool moveable id="test02" width="100" height="80" left="10" top="10" ></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           [empty]
-          <ui-transform-tool id="test03" width="100" height="80" left="10" top="10" onpointerdown="this.activate()"></ui-transform-tool>
+          <ui-transform-tool id="test03"   ></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           moveable resizable disabled
-          <ui-transform-tool moveable resizable disabled width="100" height="80" left="10" top="10" onpointerdown="this.activate()"></ui-transform-tool>
+          <ui-transform-tool moveable resizable disabled width="100" height="80" left="10" top="10" ></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           minwidth="20" minheight="20" maxwidth="300" maxheight="300"
-          <ui-transform-tool moveable resizable width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+          <ui-transform-tool moveable resizable width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" ></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           --handle-width:20px;
@@ -113,7 +118,7 @@
             --active-border-color:#ff0000;
             --border-color:#ff66ff; 
             --border-width:5px;
-          <ui-transform-tool moveable resizable width="100" height="80" left="10" top="10" onpointerdown="this.activate()"
+          <ui-transform-tool moveable resizable width="100" height="80" left="10" top="10" 
             style="--handle-width:20px;
             --handle-height:20px;
             --handle-border-radius:100vmax;
@@ -125,27 +130,31 @@
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           hide-box="box"
-          <ui-transform-tool moveable resizable hide-box="box" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+          <ui-transform-tool moveable resizable hide-box="box" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" ></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           hide-handle="00 02 20 22"
-          <ui-transform-tool moveable resizable hide-handle="00 02 20 22" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+          <ui-transform-tool moveable resizable hide-handle="00 02 20 22" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" ></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           hide-handle="01 10 12 21"
-          <ui-transform-tool moveable resizable hide-handle="01 10 12 21" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+          <ui-transform-tool moveable resizable hide-handle="01 10 12 21" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" ></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           hide-handle="*"
-          <ui-transform-tool moveable resizable hide-handle="*" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+          <ui-transform-tool moveable resizable hide-handle="*" width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" ></ui-transform-tool>
+        </div>
+        <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;" >
+          custom .active
+          <ui-transform-tool class="active" moveable resizable width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" ></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;">
           ui-transform-tool.test-part::part(???)
-          <ui-transform-tool class="test-part" moveable resizable width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+          <ui-transform-tool class="test-part" moveable resizable width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" ></ui-transform-tool>
         </div>
         <div class="position-relative bg-light p-1" style="width: 150px; height: 100px;" id="test-custom-event-parent" >
           custom event: utt-move , utt-resize
-          <ui-transform-tool id="test-custom-event" moveable resizable width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" onpointerdown="this.activate()"></ui-transform-tool>
+          <ui-transform-tool id="test-custom-event" moveable resizable width="100" height="80" left="10" top="10" minwidth="20" minheight="20" maxwidth="300" maxheight="300" ></ui-transform-tool>
         </div>
       </div>
 

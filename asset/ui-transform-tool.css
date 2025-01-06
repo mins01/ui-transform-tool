@@ -17,11 +17,7 @@ ui-transform-tool{
     display: inline-block;
 }
 ui-transform-tool[disabled]{
-    /* filter: grayscale(1) brightness(0.5); */
     z-index: 1;
-}
-ui-transform-tool[active]{
-    z-index: 19;
 }
 
 ui-transform-tool[running="bounding-box"]{
@@ -37,3 +33,16 @@ ui-transform-tool[running="handle"][data-handle="12"]{ cursor: ew-resize;  }
 ui-transform-tool[running="handle"][data-handle="20"]{ cursor: nesw-resize;  }
 ui-transform-tool[running="handle"][data-handle="21"]{ cursor: ns-resize;   }
 ui-transform-tool[running="handle"][data-handle="22"]{ cursor: nwse-resize; }
+
+/* 
+커스텀용 안내 주석
+ui-transform-tool::part(bounding-box) {
+    background-color: black;
+}
+ui-transform-tool::part(handle) {
+    background-color: red;
+    border-radius: 100vmax;
+}
+ui-transform-tool::part(handle-01){
+    transform:scale(4)
+} */
