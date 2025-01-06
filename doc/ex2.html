@@ -38,45 +38,11 @@
   <!-- //meta og -->
   
   <link rel="stylesheet" href="../asset/ui-transform-tool.css">
-  <!-- <style>
-  ui-transform-tool{
-    position: absolute;
-    left:0;top:0;
-    width:100px;height:100px;
-    /* background-color: #aabbcc99; */
 
-    /* 
-    --handle-width:10px;
-    --handle-height:10px;
-    --handle-border-radius:0px
-    --border-color:#ff66ff; 
-    --border-width:3px;
-    */
-    z-index: 10;
-  }
-  ui-transform-tool[disabled]{
-    filter: grayscale(1);
-  }
-  ui-transform-tool.active{
-    z-index: 19;
-  }
-  </style> -->
-  <style>
-    ui-transform-tool.test-part::part(bounding-box) {
-      background-color: black;
-      background-image: url(bg.gif);
-    }
-    ui-transform-tool.test-part::part(handle) {
-      background-color: red;
-      border-radius: 100vmax;
-    }
-    ui-transform-tool.test-part::part(handle-01){
-      transform:scale(4)
-    }
-  </style>
   <script src="../lib/UiTransformToolElement.js"></script>
+
   <script>
-    UiTransformToolElement.cssHtml = `<link rel="stylesheet" href="../asset/ui-transform-tool-shadowdom.css">`; // 올바른 경로로 변경!! 필수
+    UiTransformToolElement.cssHtml = `<link rel="stylesheet" href="./test-ui-transform-tool-shadowdom.css">` // 커스텀한 css 사용시
     UiTransformToolElement.defineCustomElements();
   </script>
 </head>

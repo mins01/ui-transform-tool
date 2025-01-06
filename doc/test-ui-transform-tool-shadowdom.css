@@ -4,6 +4,8 @@
     box-sizing: border-box;
 }
 .container{
+    --handle-width:50px;
+    --handle-height:50px;
     /* 
     --handle-width:10px;
     --handle-height:10px;
@@ -28,7 +30,6 @@
     height: 100%;
     padding: 0;
     margin: 0;
-    position: relative;
 }
 .box{
     width: 100%;
@@ -40,7 +41,7 @@
 .handle{
     --handle-width-gap:calc( ( var(--handle-width,10px) - var(--border-width,1px) ) / 2);
     --handle-height-gap:calc( ( var(--handle-height,10px) - var(--border-width,1px) ) / 2);
-
+    
     width: var(--handle-width,10px);
     height: var(--handle-height,10px);
     border-radius: var(--handle-border-radius,0px);
