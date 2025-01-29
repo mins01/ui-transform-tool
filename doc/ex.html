@@ -147,19 +147,20 @@
       test01.top = 50;
 
       const testCustomEvent = document.querySelector('#test-custom-event');
-      testCustomEvent.addEventListener('utt-move',(event)=>{
-        console.log('#test-custom-event',event.type,event.detail);
-      })
-      testCustomEvent.addEventListener('utt-resize',(event)=>{
-        console.log('#test-custom-event',event.type,event.detail);
-      })
+      testCustomEvent.addEventListener('utt-move-start',(event)=>{ console.log('#test-custom-event',event.type,event.detail); })
+      testCustomEvent.addEventListener('utt-resize-start',(event)=>{ console.log('#test-custom-event',event.type,event.detail); })
+      testCustomEvent.addEventListener('utt-move',(event)=>{ console.log('#test-custom-event',event.type,event.detail); })
+      testCustomEvent.addEventListener('utt-resize',(event)=>{ console.log('#test-custom-event',event.type,event.detail); })
+      testCustomEvent.addEventListener('utt-move-end',(event)=>{ console.log('#test-custom-event',event.type,event.detail); })
+      testCustomEvent.addEventListener('utt-resize-end',(event)=>{ console.log('#test-custom-event',event.type,event.detail); })
+
       const testCustomEventParent = document.querySelector('#test-custom-event-parent');
-      testCustomEventParent.addEventListener('utt-move',(event)=>{
-        console.log('#test-custom-event-parent',event.type,event.detail);
-      })
-      testCustomEventParent.addEventListener('utt-resize',(event)=>{
-        console.log('#test-custom-event-parent',event.type,event.detail);
-      })
+      testCustomEventParent.addEventListener('utt-move-start',(event)=>{ console.log('#test-custom-event-parent',event.type,event.detail); })
+      testCustomEventParent.addEventListener('utt-resize-start',(event)=>{ console.log('#test-custom-event-parent',event.type,event.detail); })
+      testCustomEventParent.addEventListener('utt-move',(event)=>{ console.log('#test-custom-event-parent',event.type,event.detail); })
+      testCustomEventParent.addEventListener('utt-resize',(event)=>{ console.log('#test-custom-event-parent',event.type,event.detail); })
+      testCustomEventParent.addEventListener('utt-move-end',(event)=>{ console.log('#test-custom-event-parent',event.type,event.detail); })
+      testCustomEventParent.addEventListener('utt-resize-end',(event)=>{ console.log('#test-custom-event-parent',event.type,event.detail); })
 
       
     </script>
