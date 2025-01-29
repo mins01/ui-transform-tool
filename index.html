@@ -43,6 +43,30 @@
         // UiTransformToolElement.cssHtml = `<link rel="stylesheet" href="./asset/ui-transform-tool-shadowdom.css">`; // 올바른 경로로 변경!! 필수
         UiTransformToolElement.defineCustomElements();
     </script>
+
+
+    <style>
+        ui-transform-tool.custom-parts::part(bounding-box){
+            border-style: dashed;
+            border-color:red;
+        }
+        ui-transform-tool.custom-parts::part(handle){
+            border-radius: 999em;
+            border-color:blue;
+        }
+        ui-transform-tool.custom-parts::part(handle-22){
+            border-radius: 0px;
+            border-color: green;
+        }
+        ui-transform-tool.custom-parts::part(default-slot){
+            width:100%;height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+    </style>
 </head>
 <body>
     <div class="container">
@@ -60,14 +84,45 @@
         <h2>ex</h2>
         <div>
             <div>
-                <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10"  maxwidth="200" maxheight="200" style="position: static;"></ui-transform-tool>
+                <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10"  maxwidth="200" maxheight="200" style="position: static;">static</ui-transform-tool>
             </div>
             <div>
-                <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10" maxwidth="200" maxheight="200" ></ui-transform-tool>
+                <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10"  minwidth="50" minheight="50" maxwidth="200" maxheight="200" >min,max</ui-transform-tool>
             </div>
             <div style="position: relative;">
-                <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10"  maxwidth="200" maxheight="200" ></ui-transform-tool>
+                <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10"  maxwidth="200" maxheight="200" >parent relative</ui-transform-tool>
             </div>
+            <div>
+                <ui-transform-tool class="custom-parts" resizable moveable  width="100" height="100" left="50" top="50"  >CUSTOM</ui-transform-tool>
+            </div>
+            <div>
+                <ui-transform-tool id="test-event" resizable moveable  width="100" height="100" left="50" top="50"  >event</ui-transform-tool>
+            </div>
+            <script>
+                {
+                    const testEvent = document.querySelector('#test-event')
+                    testEvent.addEventListener('utt-move-start',(event)=>{
+                        console.log(event.type,event.target,event.detail);
+                    })
+                    testEvent.addEventListener('utt-resize-start',(event)=>{
+                        console.log(event.type,event.target,event.detail);
+                    })
+
+                    testEvent.addEventListener('utt-move',(event)=>{
+                        console.log(event.type,event.target,event.detail);
+                    })
+                    testEvent.addEventListener('utt-resize',(event)=>{
+                        console.log(event.type,event.target,event.detail);
+                    })
+
+                    testEvent.addEventListener('utt-move-end',(event)=>{
+                        console.log(event.type,event.target,event.detail);
+                    })
+                    testEvent.addEventListener('utt-resize-end',(event)=>{
+                        console.log(event.type,event.target,event.detail);
+                    })
+                }
+            </script>
         </div>
     </div>
 </body>
