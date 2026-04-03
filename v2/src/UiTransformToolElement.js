@@ -287,14 +287,14 @@ export default class UiColorBarElement extends HTMLElement {
                     position: fixed;
                     margin: 0;
                     padding: 0;
-                    // left: var(--left,0);
-                    // top: var(--top,0);
-                    left: 0;
-                    top: 0;
+                    left: var(--left,0);
+                    top: var(--top,0);
+                    // left: 0;
+                    // top: 0;
                     width: var(--width,0);
                     height: var(--height,0);
-                    // transform: rotate(var(--rotation,0deg));
-                    transform: translate(var(--left,0), var(--top,0)) rotate(var(--rotation,0deg));
+                    transform: rotate(var(--rotation,0deg));
+                    // transform: translate(var(--left,0), var(--top,0)) rotate(var(--rotation,0deg));
                     pointer-events: none;
                 }
                 :host::part(wapper){
