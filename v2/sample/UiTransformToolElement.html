@@ -54,10 +54,45 @@
         </div>
         <hr>
         <h2>ex</h2>
-        <div class="my-3" >
-            <ui-transform-tool style="min-width:20px;min-height:20px;">111</ui-transform-tool>
+        <div class="my-3" style="height: 200vh;" >
+            <div class="d-flex gap-3 flex-wrap">
+                <div class="rounded border border-1 box-shadow" style="width:200px;height:200px;" onclick="tft01.attachTo(this);syncTarget=this">1</div>
+                <div class="rounded border border-1 box-shadow" style="width:200px;height:200px;" onclick="tft01.attachTo(this);syncTarget=this">2</div>
+                <div class="rounded border border-1 box-shadow" style="width:200px;height:200px;" onclick="tft01.attachTo(this);syncTarget=this">3</div>
+                <div class="rounded border border-1 box-shadow" style="width:200px;height:200px;" onclick="tft01.attachTo(this);syncTarget=this">4</div>
+                <div class="rounded border border-1 box-shadow" style="width:200px;height:200px;" onclick="tft01.attachTo(this);syncTarget=this">5</div>    
+            </div>
+            <div class="position-absolute rounded border border-1 box-shadow text-bg-primary" style="width:200px;height:200px;left:50%;top:50%;" onclick="tft01.attachTo(this);syncTarget=this">이동가능</div>
+            <div class="position-absolute rounded border border-1 box-shadow text-bg-info" style="width:100px;height:100px;left:30%;top:20%;" onclick="tft01.attachTo(this);syncTarget=this">이동가능</div>
+            
         </div>
     </div>
     
+    <ui-transform-tool id="tft01" style="min-width:20px;min-height:20px;" left="100" top="300" width="123" height="214">111</ui-transform-tool>
+    <script>
+        let syncTarget = null
+        const tft01 = document.getElementById("tft01");
+        tft01.addEventListener('transform-move', e => {
+            const target = e.target
+            console.log(e.type,target.left,target.top,target.width,target.height)
+            if(syncTarget){
+                target.offsetParent
+                syncTarget.style.left =(window.scrollX+target.left)+'px';
+                syncTarget.style.top = (window.scrollY+target.top)+'px';
+                syncTarget.style.width = target.width+'px';
+                syncTarget.style.height = target.height+'px';
+            }
+        })
+        tft01.addEventListener('transform-resize', e => {
+            const target = e.target
+            console.log(e.type,target.left,target.top,target.width,target.height)
+            if(syncTarget){
+                syncTarget.style.left = (window.scrollX+target.left)+'px';
+                syncTarget.style.top = (window.scrollY+target.top)+'px';
+                syncTarget.style.width = target.width+'px';
+                syncTarget.style.height = target.height+'px';
+            }
+        })
+    </script>
 </body>
 </html>

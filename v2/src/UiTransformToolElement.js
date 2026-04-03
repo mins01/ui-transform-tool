@@ -11,13 +11,13 @@ export default class UiColorBarElement extends HTMLElement {
 
     // 스타일 확장
     static prependStyle = `<style>
-                
+
             </style>`; // 값 초기화 등
     static appendStyle = `<style></style>`; // 커스텀 스타일 등
 
     /** 감시할 속성 목록 */
     static get observedAttributes() {
-        return [];
+        return [ 'width', 'height', 'left', 'top', ];
     }
 
     /** 커스텀 엘리먼트 등록 */
@@ -32,15 +32,16 @@ export default class UiColorBarElement extends HTMLElement {
      * fields
      * ========================= */
 
-    left=0;
-    top=0;
-    width=0;
-    height=0;
-    rotation=0; //deg
+    #left=0;
+    #top=0;
+    #width=0;
+    #height=0;
+    #rotation=0; //deg
     zoom=1;
 
-    #left0=0;
-    #top0=0;
+    #rotation0=null;
+    #left0=null;
+    #top0=null;
     #x0=null;
     #y0=null;
     #rect=null;
@@ -51,7 +52,14 @@ export default class UiColorBarElement extends HTMLElement {
     /* =========================
      * getter / setter
      * ========================= */
-
+    get left() { return this.#left; }
+    get top() { return this.#top; }
+    get width() { return this.#width; }
+    get height() { return this.#height; }
+    set left(v) { this.#left = v; this._syncStyle(); }
+    set top(v) { this.#top = v; this._syncStyle(); }
+    set width(v) { this.#width = v; this._syncStyle(); }
+    set height(v) { this.#height = v; this._syncStyle(); }
 
     /* =========================
      * constructor
@@ -69,15 +77,19 @@ export default class UiColorBarElement extends HTMLElement {
     connectedCallback() {
         if (!this.shadowRoot.firstChild) this.render();
         this._syncStyle();
-        this.addEventListener('pointerdown', this.handlePointerdown);
-        this.addEventListener('pointerup', this.handlePointerup);
-        this.addEventListener('pointercancel', this.handlePointercancel);
+        const wapper = this.shadowRoot.querySelector('.wapper') //this가 아니라 내부 요소로 해야 event.target이 내부 요소로 나온다.
+        wapper.addEventListener('dblclick', this.handleDblclick);
+        wapper.addEventListener('pointerdown', this.handlePointerdown);
+        wapper.addEventListener('pointerup', this.handlePointerup);
+        wapper.addEventListener('pointercancel', this.handlePointercancel);
     }
 
-    disconnectedCallback() {
-        this.removeEventListener('pointerdown', this.handlePointerdown);
-        this.removeEventListener('pointerup', this.handlePointerup);
-        this.removeEventListener('pointercancel', this.handlePointercancel);
+    disconnectedCallback() {       
+        const wapper = this.shadowRoot.querySelector('.wapper')
+        wapper.removeEventListener('dblclick', this.handleDblclick);
+        wapper.removeEventListener('pointerdown', this.handlePointerdown);
+        wapper.removeEventListener('pointerup', this.handlePointerup);
+        wapper.removeEventListener('pointercancel', this.handlePointercancel);
     }
 
     /* =========================
@@ -86,6 +98,10 @@ export default class UiColorBarElement extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
+        if(name==='left') this.#left = Number(newValue);
+        if(name==='top') this.#top = Number(newValue);
+        if(name==='width') this.#width = Number(newValue);
+        if(name==='height') this.#height = Number(newValue);
     }
 
     /* =========================
@@ -93,20 +109,28 @@ export default class UiColorBarElement extends HTMLElement {
      * ========================= */
 
     moveTo(left, top) {
-        this.left = left;
-        this.top = top;
+        this.#left = left;
+        this.#top = top;
         this._syncStyle();
     }
     resizeTo(width, height) {
-        this.width = width;
-        this.height = height;
+        this.#width = width;
+        this.#height = height;
         this._syncStyle();
     }
     setRect(left, top, width, height) {
-        this.left = left;
-        this.top = top;
-        this.width = width;
-        this.height = height;
+        this.#left = left;
+        this.#top = top;
+        this.#width = width;
+        this.#height = height;
+        this._syncStyle();
+    }
+    attachTo(element) {
+        const {left,top,width,height} = element.getBoundingClientRect()
+        this.setRect(left, top, width, height);
+    }
+    rotateTo(rotation) {
+        this.#rotation = rotation;
         this._syncStyle();
     }
     /* =========================
@@ -114,98 +138,121 @@ export default class UiColorBarElement extends HTMLElement {
      * ========================= */
 
     _syncStyle() {
-        this.style.setProperty('--left', this.left+'px');
-        this.style.setProperty('--top', this.top+'px');
-        this.style.setProperty('--width', this.width+'px');
-        this.style.setProperty('--height', this.height+'px');
-        // this.style.setProperty('--rotation', this.rotation+'deg');
+        this.style.setProperty('--left', this.#left+'px');
+        this.style.setProperty('--top', this.#top+'px');
+        this.style.setProperty('--width', this.#width+'px');
+        this.style.setProperty('--height', this.#height+'px');
+        this.style.setProperty('--rotation', this.#rotation+'deg');
         // this.style.setProperty('--zoom', this.zoom);
     }
 
     /* =========================
      * pointer events
      * ========================= */
+    handleDblclick = (event) => {
+        const target = event.target; // 최초 이벤트 발생 요소 지정
+        if(target.dataset.rotate){
+            this.rotateTo(0);
+            this.dispatchEvent(new Event('transform-rotate', { bubbles: true, cancelable: true }));
+            this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
+        }
+    }
+    handlePointerdown = (event) => {
+        // const eventElement = event.composedPath()[0]; // 최초 이벤트 발생 요소 지정
+        const target = event.target; // 최초 이벤트 발생 요소 지정
+        target.addEventListener('pointermove', this.handlePointermove);
+        target.setPointerCapture(event.pointerId);
 
-    handlePointerdown(event) {
-        this.addEventListener('pointermove', this.handlePointermove);
-        this.setPointerCapture(event.pointerId);
-
-        const eventElement = event.composedPath()[0]; // 최초 이벤트 발생 요소 지정
-        console.log(eventElement);
-        
-        if(eventElement.dataset.move){
+        if(!target){
+            return;
+        }else if(target.dataset.move){
             this._transformType = 'move'
-            this.#left0 = this.left;
-            this.#top0 = this.top;
+            this.#left0 = this.#left;
+            this.#top0 = this.#top;
             this.#x0 = event.clientX;
             this.#y0 = event.clientY;
-        }else if(eventElement.dataset.resize){
+        }else if(target.dataset.rotate){
+            this._transformType = 'rotate'
+            this.#rotation0 = this.#rotation;
+            this.#x0 = this.#left+this.#width/2;
+            this.#y0 = this.#top+this.#height/2;
+        }else if(target.dataset.resize){
             this._transformType = 'resize';
-            this._resizeType = eventElement.dataset.resize;
+            this._resizeType = target.dataset.resize;
             this.#y0 = null;
             this.#y0 = null;
             if(this._resizeType.includes('s')){
-                this.#y0 = this.top;
+                this.#y0 = this.#top;
             }
             if(this._resizeType.includes('n')){
-                this.#y0 = this.top+this.height;
+                this.#y0 = this.#top+this.#height;
             }
             if(this._resizeType.includes('e')){
-                this.#x0 = this.left;
+                this.#x0 = this.#left;
             }
             if(this._resizeType.includes('w')){
-                this.#x0 = this.left+this.width;
+                this.#x0 = this.#left+this.#width;
             }
         }
 
-        
+
         // this.#rect = this.getBoundingClientRect();
 
         this.dispatchEvent(new Event('transform-start', { bubbles: true, cancelable: true }));
     }
 
-    handlePointermove(event) {
-        if (!this.hasPointerCapture(event.pointerId)) return;
+    handlePointermove = (event) => {
+        const target = event.target; // 최초 이벤트 발생 요소 지정
+        if (!target.hasPointerCapture(event.pointerId)) return;
 
-        
+
         const x1 = event.clientX;
         const y1 = event.clientY;
 
         if(this._transformType==='move'){
             const left = this.#left0 + x1 - this.#x0;
             const top = this.#top0 + y1 - this.#y0;
-            console.log(this.#left0,left,x1 - this.#x0);
             this.moveTo(left, top);
+            this.dispatchEvent(new Event('transform-move', { bubbles: true, cancelable: true }));
+            this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
+        }else if(this._transformType==='rotate'){
+            const x1 = event.clientX;
+            const y1 = event.clientY;
+            const rad = Math.atan2(y1 - this.#y0, x1 - this.#x0);
+            const rotation = ( rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
+
+            this.rotateTo(rotation);
+            this.dispatchEvent(new Event('transform-rotate', { bubbles: true, cancelable: true }));
+            this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
         }else if(this._transformType==='resize'){
 
-            const left = this.#x0==null?this.left:Math.min(this.#x0, x1);
-            const top  = this.#y0==null?this.top:Math.min(this.#y0, y1);
-            const width = this.#x0==null?this.width:Math.abs(this.#x0 - x1);
-            const height = this.#y0==null?this.height:Math.abs(this.#y0 - y1);
+            const left = this.#x0==null?this.#left:Math.min(this.#x0, x1);
+            const top  = this.#y0==null?this.#top:Math.min(this.#y0, y1);
+            const width = this.#x0==null?this.#width:Math.abs(this.#x0 - x1);
+            const height = this.#y0==null?this.#height:Math.abs(this.#y0 - y1);
             this.setRect(left, top,width, height);
-            
-            
-
-            
+            this.dispatchEvent(new Event('transform-resize', { bubbles: true, cancelable: true }));
+            this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
         }
 
-
-        this.dispatchEvent(new Event('transform-move', { bubbles: true, cancelable: true }));
     }
 
-    handlePointerup(event) {
-        this.removeEventListener('pointermove', this.handlePointermove);
-        this.releasePointerCapture(event.pointerId);
-        
+    handlePointerup = (event) => {
+        const target = event.target; // 최초 이벤트 발생 요소 지정
+
+        target.removeEventListener('pointermove', this.handlePointermove);
+        target.releasePointerCapture(event.pointerId);
+
         this.#left0 = null;
         this.#top0 = null;
         this.#x0 = null;
         this.#y0 = null;
+        this.#rotation0 = null;
 
         this.dispatchEvent(new Event('transform-end', { bubbles: true, cancelable: true }));
     }
 
-    handlePointercancel(event) {
+    handlePointercancel = (event) => {
         return this.handlePointerup(event);
     }
 
@@ -240,86 +287,123 @@ export default class UiColorBarElement extends HTMLElement {
                     position: fixed;
                     margin: 0;
                     padding: 0;
-                    left: var(--left,0);
-                    top: var(--top,0);
+                    // left: var(--left,0);
+                    // top: var(--top,0);
+                    left: 0;
+                    top: 0;
                     width: var(--width,0);
                     height: var(--height,0);
-                    pointer-events: none;                
+                    // transform: rotate(var(--rotation,0deg));
+                    transform: translate(var(--left,0), var(--top,0)) rotate(var(--rotation,0deg));
+                    pointer-events: none;
                 }
                 :host::part(wapper){
-                    pointer-events: none;      
+                    pointer-events: none;
                     position: absolute;
                     inset: 0;
                 }
                 :host::part(border){
-                    pointer-events: none;                
-                    border:1px dashed #000;
+                    pointer-events: none;
                     position: absolute;
-                    inset:calc(-1px / 2);
-                }                    
+                    // border:2px dashed #000;
+                    // inset:calc(-1px / 2);
+                    outline: 2px dashed #000;
+                    inset:0;
+                }
                 :host::part(handles){
-                    pointer-events: all;                
+                    pointer-events: all;
                     position: absolute;
                     inset: 0;
                 }
-                :host::part(resize-handle){
+                :host .resize-handle{
+                    z-index: 3;
+                    pointer-events: all;
                     aspect-ratio: 1 / 1;
-                    width:8px;
+                    width:var(--handle-size,12px);
                     border: 1px solid #000;
                     box-sizing: border-box;
                     position: absolute;
-                    
+
                     contain: strict;
                     overflow: hidden;
                     background-color: #fff;
-                    pointer-events: all;
                     transform: translate(-50%, -50%);
                 }
-                :host::part(resize-handle-nw){
+                :host .resize-handle[data-resize='nw']{
                     left:0;top:0;
                 }
-                :host::part(resize-handle-n){
+                :host .resize-handle[data-resize='n']{
                     left:50%;top:0;
                 }
-                :host::part(resize-handle-ne){
+                :host .resize-handle[data-resize='ne']{
                     left:100%;top:0;
                 }
-                :host::part(resize-handle-w){
+                :host .resize-handle[data-resize='w']{
                     left:0;top:50%;
                 }
-                :host::part(resize-handle-c){
+                :host .resize-handle[data-resize='c']{
                     left:50%;top:50%;
                     display: none;
                 }
-                :host::part(resize-handle-e){
+                :host .resize-handle[data-resize='e']{
                     left:100%;top:50%;
                 }
-                :host::part(resize-handle-sw){
+                :host .resize-handle[data-resize='sw']{
                     left:0;top:100%;
                 }
-                :host::part(resize-handle-s){
+                :host .resize-handle[data-resize='s']{
                     left:50%;top:100%;
                 }
-                :host::part(resize-handle-se){
+                :host .resize-handle[data-resize='se']{
                     left:100%;top:100%;
                 }
-
+                :host .rotate-handle-wrap{
+                    z-index: 2;
+                    position: absolute;
+                    left: 50%;
+                    top: 100%;
+                    transform: translate(-50%, 0%);
+                    bottom: -30px;
+                    width: 0px;
+                    border-right: 2px dashed #000;
+                    box-sizing: content-box;
+                }
+                :host .rotate-handle{
+                    border-radius: 100vmax;
+                    pointer-events: all;
+                    aspect-ratio: 1 / 1;
+                    width:var(--handle-size,12px);
+                    border: 1px solid #000;
+                    box-sizing: border-box;
+                    position: absolute;
+                    bottom:0px;
+                    left:50%;
+                    contain: strict;
+                    overflow: hidden;
+                    background-color: #fff;
+                    transform: translate(calc(-50% + 1px), 50%);
+                }
             </style>
             ${this.constructor.appendStyle}
-            <div part="wapper">
+            <div part="wapper" class="wapper">
                 <div part="border"></div>
                 <div part="handles" data-move="move">
-                    <div part="resize-handle resize-handle-nw" class="resize-handle" data-resize="nw">00</div>
-                    <div part="resize-handle resize-handle-n" class="resize-handle" data-resize="n">01</div>
-                    <div part="resize-handle resize-handle-ne" class="resize-handle" data-resize="ne">02</div>
-                    <div part="resize-handle resize-handle-w" class="resize-handle" data-resize="w">10</div>
-                    <div part="resize-handle resize-handle-c" class="resize-handle" data-move="move">11</div>
-                    <div part="resize-handle resize-handle-e" class="resize-handle" data-resize="e">12</div>
-                    <div part="resize-handle resize-handle-sw" class="resize-handle" data-resize="sw">20</div>
-                    <div part="resize-handle resize-handle-s" class="resize-handle" data-resize="s">21</div>
-                    <div part="resize-handle resize-handle-se" class="resize-handle" data-resize="se">22</div>
+                    <div part="resize-handle resize-handle-c" class="resize-handle" data-resize="c" data-move="move"></div>
+
+                    <div part="resize-handle resize-handle-nw" class="resize-handle" data-resize="nw"></div>
+                    <div part="resize-handle resize-handle-n" class="resize-handle" data-resize="n"></div>
+                    <div part="resize-handle resize-handle-ne" class="resize-handle" data-resize="ne"></div>
+                    <div part="resize-handle resize-handle-w" class="resize-handle" data-resize="w"></div>
+
+                    <div part="resize-handle resize-handle-e" class="resize-handle" data-resize="e"></div>
+                    <div part="resize-handle resize-handle-sw" class="resize-handle" data-resize="sw"></div>
+                    <div part="resize-handle resize-handle-s" class="resize-handle" data-resize="s"></div>
+                    <div part="resize-handle resize-handle-se" class="resize-handle" data-resize="se"></div>
+                    <div part="rotate-handle-wrap" class="rotate-handle-wrap">
+                        <div part="rotate-handle" class="rotate-handle" data-rotate="rotate"></div>
+                    </div>
                 </div>
-                
+
 
                 <slot></slot>
             </div>
