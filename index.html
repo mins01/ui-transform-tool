@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
     <!-- vue.js -->
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
     
     <!-- meta og -->
     
@@ -37,114 +37,17 @@
     
     <!-- //meta og -->
 
-    <link rel="stylesheet" href="./asset/ui-transform-tool.css">
-    <script src="./lib/UiTransformToolElement.js"></script>
-    <script>
-        // UiTransformToolElement.cssHtml = `<link rel="stylesheet" href="./asset/ui-transform-tool-shadowdom.css">`; // 올바른 경로로 변경!! 필수
-        UiTransformToolElement.defineCustomElements();
-    </script>
-
-
-    <style>
-        ui-transform-tool.custom-parts::part(bounding-box){
-            border-style: dashed;
-            border-color:red;
-        }
-        ui-transform-tool.custom-parts::part(handle){
-            border-radius: 999em;
-            border-color:blue;
-        }
-        ui-transform-tool.custom-parts::part(handle-22){
-            border-radius: 0px;
-            border-color: green;
-        }
-        ui-transform-tool.custom-parts::part(default-slot){
-            width:100%;height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        
-    </style>
 </head>
 <body>
     <div class="container">
         <h1>ui-transform-tool</h1>
         <h2>이게 뭔가?</h2>
-        <div>
-            HTMLElement 클래스를 상속받아 커스텀 엘레멘트를 만들고 그것이 transform tool 처럼 동작하게 한다.
-        </div>
-        <hr>
-        <h2>doc</h2>
-        <ul>
-            <li><a href="doc/ex.html">ex.html</a> 사용 예제</li>
+        <ul class="list-group">
+            <li class="list-group-item">
+                <a href="./v1/index.html">/v1/index.html</a>
+            </li>
         </ul>
-        <hr>
-        <h2>ex</h2>
-        <div>
-            <div>
-                <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10"  maxwidth="200" maxheight="200" style="position: static;">static</ui-transform-tool>
-            </div>
-            <div>
-                <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10"  minwidth="50" minheight="50" maxwidth="200" maxheight="200" >min,max</ui-transform-tool>
-            </div>
-            <div style="position: relative;">
-                <ui-transform-tool resizable moveable  width="100" height="100" left="10" top="10"  maxwidth="200" maxheight="200" >parent relative</ui-transform-tool>
-            </div>
-            <div>
-                <ui-transform-tool class="custom-parts" resizable moveable  width="100" height="100" left="50" top="50"  >CUSTOM</ui-transform-tool>
-            </div>
-            <div>
-                <ui-transform-tool id="test-event" resizable moveable  width="100" height="100" left="50" top="50"  >event</ui-transform-tool>
-            </div>
-            <div>
-                <ui-transform-tool id="test-integeronly" resizable moveable integeronly width="100" height="100" left="150" top="50"  >
-                    set integeronly
-                    <div id="test-integeronly-info"></div>
-                </ui-transform-tool>
-                <ui-transform-tool id="test-nointegeronly" resizable moveable width="100" height="100" left="50" top="150"  >
-                    noset integeronly
-                    <div id="test-nointegeronly-info"></div>
-                </ui-transform-tool>
-            </div>
-            <script>
-                {
-                    const testEvent = document.querySelector('#test-event')
-                    testEvent.addEventListener('utt-move-start',(event)=>{
-                        console.log(event.type,event.target,event.detail);
-                    })
-                    testEvent.addEventListener('utt-resize-start',(event)=>{
-                        console.log(event.type,event.target,event.detail);
-                    })
-
-                    testEvent.addEventListener('utt-move',(event)=>{
-                        console.log(event.type,event.target,event.detail);
-                    })
-                    testEvent.addEventListener('utt-resize',(event)=>{
-                        console.log(event.type,event.target,event.detail);
-                    })
-
-                    testEvent.addEventListener('utt-move-end',(event)=>{
-                        console.log(event.type,event.target,event.detail);
-                    })
-                    testEvent.addEventListener('utt-resize-end',(event)=>{
-                        console.log(event.type,event.target,event.detail);
-                    })
-
-                    document.querySelector('#test-integeronly').addEventListener('utt-move-end',(event)=>{
-                        let d = document.querySelector('#test-integeronly');
-                        document.querySelector('#test-integeronly-info').textContent = [d.width,d.height,d.left,d.top].join('/')
-                        console.log(event.type,event.target,event.detail);
-                    })
-                    document.querySelector('#test-nointegeronly').addEventListener('utt-move-end',(event)=>{
-                        let d = document.querySelector('#test-nointegeronly');
-                        document.querySelector('#test-nointegeronly-info').textContent = [d.width,d.height,d.left,d.top].join('/')
-                        console.log(event.type,event.target,event.detail);
-                    })
-                }
-            </script>
-        </div>
+        
     </div>
 </body>
 </html>
