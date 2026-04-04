@@ -146,6 +146,20 @@ export default class UiColorBarElement extends HTMLElement {
         // this.style.setProperty('--zoom', this.zoom);
     }
 
+    rotatePoint(x, y, cx, cy, angle) {
+        const rad = angle * Math.PI / 180;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+
+        const dx = x - cx;
+        const dy = y - cy;
+
+        return {
+            x: cx + dx * cos - dy * sin,
+            y: cy + dx * sin + dy * cos
+        };
+    }
+
     /* =========================
      * pointer events
      * ========================= */
@@ -157,6 +171,12 @@ export default class UiColorBarElement extends HTMLElement {
             this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
         }
     }
+    #cx0 = 0;
+    #cy0 = 0;
+    #fixedWorld = null;
+    #handle;
+    #width0;
+    #height0;
     handlePointerdown = (event) => {
         // const eventElement = event.composedPath()[0]; // 최초 이벤트 발생 요소 지정
         const target = event.target; // 최초 이벤트 발생 요소 지정
@@ -179,20 +199,51 @@ export default class UiColorBarElement extends HTMLElement {
         }else if(target.dataset.resize){
             this._transformType = 'resize';
             this._resizeType = target.dataset.resize;
-            this.#y0 = null;
-            this.#y0 = null;
-            if(this._resizeType.includes('s')){
-                this.#y0 = this.#top;
-            }
-            if(this._resizeType.includes('n')){
-                this.#y0 = this.#top+this.#height;
-            }
-            if(this._resizeType.includes('e')){
-                this.#x0 = this.#left;
-            }
-            if(this._resizeType.includes('w')){
-                this.#x0 = this.#left+this.#width;
-            }
+            this.#handle = target.dataset.resize;
+
+    this.#rotation0 = this.#rotation;
+
+    this.#left0 = this.#left;
+    this.#top0 = this.#top;
+    this.#width0 = this.#width;
+    this.#height0 = this.#height;
+
+    const cx = this.#left + this.#width / 2;
+    const cy = this.#top  + this.#height / 2;
+
+    this.#cx0 = cx;
+    this.#cy0 = cy;
+
+    // 🔥 고정점 (반대편 코너)
+    let fx, fy;
+
+    switch (this.#handle) {
+        case "se": fx = this.#left; fy = this.#top; break;
+        case "nw": fx = this.#left + this.#width; fy = this.#top + this.#height; break;
+        case "ne": fx = this.#left; fy = this.#top + this.#height; break;
+        case "sw": fx = this.#left + this.#width; fy = this.#top; break;
+
+                // 🔥 엣지 (중앙 반대편)
+        case "n": fx = this.#left + this.#width / 2; fy = this.#top + this.#height; break;
+        case "s": fx = this.#left + this.#width / 2; fy = this.#top; break;
+        case "w": fx = this.#left + this.#width; fy = this.#top + this.#height / 2; break;
+        case "e": fx = this.#left; fy = this.#top + this.#height / 2; break;
+    }
+
+    // 👉 world 좌표로 저장
+    this.#fixedWorld = this.rotatePoint(fx, fy, cx, cy, this.#rotation);
+            // if(this._resizeType.includes('s')){
+            //     this.#y0 = this.#top;
+            // }
+            // if(this._resizeType.includes('n')){
+            //     this.#y0 = this.#top+this.#height;
+            // }
+            // if(this._resizeType.includes('e')){
+            //     this.#x0 = this.#left;
+            // }
+            // if(this._resizeType.includes('w')){
+            //     this.#x0 = this.#left+this.#width;
+            // }
         }
 
 
@@ -225,12 +276,93 @@ export default class UiColorBarElement extends HTMLElement {
             this.dispatchEvent(new Event('transform-rotate', { bubbles: true, cancelable: true }));
             this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
         }else if(this._transformType==='resize'){
+            const angle = this.#rotation0;
+            const e = event;
+            const fixedWorld = this.#fixedWorld;
+            const dragWorld = { x: e.clientX, y: e.clientY };
 
-            const left = this.#x0==null?this.#left:Math.min(this.#x0, x1);
-            const top  = this.#y0==null?this.#top:Math.min(this.#y0, y1);
-            const width = this.#x0==null?this.#width:Math.abs(this.#x0 - x1);
-            const height = this.#y0==null?this.#height:Math.abs(this.#y0 - y1);
-            this.setRect(left, top,width, height);
+            // 🔥 center를 매번 재계산 (포토샵 핵심)
+            const cx = (fixedWorld.x + dragWorld.x) / 2;
+            const cy = (fixedWorld.y + dragWorld.y) / 2;
+
+            // world → local (회전 제거)
+            const fixed = this.rotatePoint(fixedWorld.x, fixedWorld.y, cx, cy, -angle);
+            const drag  = this.rotatePoint(dragWorld.x, dragWorld.y, cx, cy, -angle);
+
+            let left, top, width, height;
+
+            switch (this.#handle) {
+                case "se":
+                    left   = fixed.x;
+                    top    = fixed.y;
+                    width  = drag.x - fixed.x;
+                    height = drag.y - fixed.y;
+                    break;
+
+                case "nw":
+                    left   = drag.x;
+                    top    = drag.y;
+                    width  = fixed.x - drag.x;
+                    height = fixed.y - drag.y;
+                    break;
+
+                case "ne":
+                    left   = fixed.x;
+                    top    = drag.y;
+                    width  = drag.x - fixed.x;
+                    height = fixed.y - drag.y;
+                    break;
+
+                case "sw":
+                    left   = drag.x;
+                    top    = fixed.y;
+                    width  = fixed.x - drag.x;
+                    height = drag.y - fixed.y;
+                    break;
+                // 🔥 엣지
+                case "n":
+                    left = fixed.x - (this.#width0 / 2);
+                    top = drag.y;
+                    width = this.#width0;
+                    height = fixed.y - drag.y;
+                    break;
+
+                case "s":
+                    left = fixed.x - (this.#width0 / 2);
+                    top = fixed.y;
+                    width = this.#width0;
+                    height = drag.y - fixed.y;
+                    break;
+
+                case "w":
+                    left = drag.x;
+                    top = fixed.y - (this.#height0 / 2);
+                    width = fixed.x - drag.x;
+                    height = this.#height0;
+                    break;
+
+                case "e":
+                    left = fixed.x;
+                    top = fixed.y - (this.#height0 / 2);
+                    width = drag.x - fixed.x;
+                    height = this.#height0;
+                    break;
+            }
+
+            // 🔥 음수 방지 (뒤집힘 대응)
+            if (width < 0) {
+                left += width;
+                width *= -1;
+            }
+
+            if (height < 0) {
+                top += height;
+                height *= -1;
+            }
+
+
+            this.setRect(left, top, width, height);
+
             this.dispatchEvent(new Event('transform-resize', { bubbles: true, cancelable: true }));
             this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
         }
