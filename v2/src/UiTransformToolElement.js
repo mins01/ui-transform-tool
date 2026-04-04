@@ -56,10 +56,12 @@ export default class UiColorBarElement extends HTMLElement {
     get top() { return this.#top; }
     get width() { return this.#width; }
     get height() { return this.#height; }
+    get rotation() { return this.#rotation; }
     set left(v) { this.#left = v; this._syncStyle(); }
     set top(v) { this.#top = v; this._syncStyle(); }
     set width(v) { this.#width = v; this._syncStyle(); }
     set height(v) { this.#height = v; this._syncStyle(); }
+    set rotation(v) { this.#rotation = v; this._syncStyle(); }
 
     /* =========================
      * constructor
@@ -128,6 +130,7 @@ export default class UiColorBarElement extends HTMLElement {
     attachTo(element) {
         const {left,top,width,height} = element.getBoundingClientRect()
         this.setRect(left, top, width, height);
+        this.dispatchEvent(new CustomEvent('transform-attach', { bubbles: true, cancelable: true ,detail: { attachedElement: element, }})); 
     }
     rotateTo(rotation) {
         this.#rotation = rotation;
