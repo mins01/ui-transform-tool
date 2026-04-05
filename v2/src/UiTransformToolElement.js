@@ -4,6 +4,10 @@ export default class UiColorBarElement extends HTMLElement {
      * static
      * ========================= */
 
+    static transformToolSync = true; //싱크여부 기본형
+
+    transformToolSync = UiColorBarElement.transformToolSync; //싱크여부
+
     /** 커스텀 엘리먼트 태그명 */
     static tagName = 'ui-transform-tool';
 
@@ -131,31 +135,49 @@ export default class UiColorBarElement extends HTMLElement {
     target = null;
     setTarget(target) {
         if(this.target){
-            this.removeEventListener('transform-update', this.handleTansformUpdate);    
+            this.removeEventListener('transform-update', this.handleTargetSync);    
+            this.classList.remove('has-target');
         }
         this.target = target
         if(target){
-            const { left, top, width, height, rotation } = this.getRectFromStyle(target);
-            // console.log({ left, top, width, height, rotation });
-            
-            this.setRect(left, top, width, height, rotation);           
-            this.addEventListener('transform-update', this.handleTansformUpdate);
+            this.classList.add('has-target');
+            if(this.transformToolSync && !target.hasAttribute('data-transform-tool-no-sync')){
+                this.syncFrom(target)       
+                this.applyStyle(target);
+            }
+            this.addEventListener('transform-update', this.handleTargetSync);
         }
         this.target = target
-        this.dispatchEvent(new CustomEvent('transform-target-change', { bubbles: true, cancelable: true, detail: { target: target, } }));
+        this.dispatchCustomEvent('transform-target-change')
     }
-    handleTansformUpdate = (event) => {
+    dispatchCustomEvent(type, optDetail={}) {
+        const detail = {
+            left:this.left,
+            top:this.top,
+            width:this.width,
+            height:this.height,
+            rotation:this.rotation,
+            target:this.target,
+            ...optDetail
+        }
+        this.dispatchEvent(new CustomEvent(type, { bubbles: true, cancelable: true, detail }));
+    }
+    handleTargetSync = (event) => {
         const target = this.target
-        this.applyStyle(target);
-
-        const { left, top, width, height, rotation } = this.getRectFromStyle(target);
-        console.log({ left, top, width, height, rotation });
-
-        this.setRect(left, top, width, height, rotation); 
-
+        if(!this.transformToolSync || target.hasAttribute('data-transform-tool-no-sync')) return; //싱크 안함
+        this.syncTo(target);
     }
+
+    // target -> tool 
+    syncFrom(target) {
+        const { left, top, width, height, rotation } = this.getRectFromStyle(target);
+        this.setRect(left, top, width, height, rotation); 
+    }
+    // tool -> target
     syncTo(target) {
         this.applyStyle(target)
+        this.syncFrom(target)
+        this.dispatchCustomEvent('transform-target-sync',{action:'sync'})
     }
     rotateTo(rotation) {
         this.#rotation = rotation;
@@ -213,8 +235,8 @@ export default class UiColorBarElement extends HTMLElement {
         const target = event.target; // 최초 이벤트 발생 요소 지정
         if (target.dataset.rotate) {
             this.rotateTo(0);
-            this.dispatchEvent(new Event('transform-rotate', { bubbles: true, cancelable: true }));
-            this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
+            this.dispatchCustomEvent('transform-update',{action:'rotate',handle:target})
+            this.dispatchCustomEvent('transform-update',{action:'rotate-reset',handle:target})
         }
     }
 
@@ -244,10 +266,7 @@ export default class UiColorBarElement extends HTMLElement {
             this.#handlePointerdownForResize(event);
         }
 
-
-        // this.#rect = this.getBoundingClientRect();
-
-        this.dispatchEvent(new Event('transform-start', { bubbles: true, cancelable: true }));
+        this.dispatchCustomEvent('transform-start',{action:'start',handle:event.target})
     }
     #cx0 = null
     #cy0 = null
@@ -289,8 +308,7 @@ export default class UiColorBarElement extends HTMLElement {
             const left = this.#left0 + x1 - this.#x0;
             const top = this.#top0 + y1 - this.#y0;
             this.moveTo(left, top);
-            this.dispatchEvent(new Event('transform-move', { bubbles: true, cancelable: true }));
-            this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
+            this.dispatchCustomEvent('transform-update',{action:'move',handle:event.target})
         } else if (this.#transformType === 'rotate') {
             const x1 = event.pageX;
             const y1 = event.pageY;
@@ -298,12 +316,10 @@ export default class UiColorBarElement extends HTMLElement {
             const rotation = (rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
 
             this.rotateTo(rotation);
-            this.dispatchEvent(new Event('transform-rotate', { bubbles: true, cancelable: true }));
-            this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
+            this.dispatchCustomEvent('transform-update',{action:'rotate',handle:event.target})
         } else if (this.#transformType === 'resize') {
             this.#handlePointermoveForResize(event);
-            this.dispatchEvent(new Event('transform-resize', { bubbles: true, cancelable: true }));
-            this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
+            this.dispatchCustomEvent('transform-update',{action:'resize',handle:event.target})
         }
 
     }
@@ -369,29 +385,28 @@ export default class UiColorBarElement extends HTMLElement {
             case "n":
                 left = -hw;
                 right = hw;
-                bottom = hh;
-                top = p.y;
+                bottom = Math.max(hh,p.y);
+                top = Math.min(p.y,hh);
                 break;
 
             case "s":
                 left = -hw;
                 right = hw;
-                top = -hh;
-                bottom = p.y;
+                top = Math.min(-hh,p.y);
+                bottom = Math.max(p.y,-hh);
                 break;
-
             case "w":
                 top = -hh;
                 bottom = hh;
-                right = hw;
-                left = p.x;
+                right = Math.max(hw,p.x);
+                left = Math.min(p.x,hw);
                 break;
 
             case "e":
                 top = -hh;
                 bottom = hh;
-                left = -hw;
-                right = p.x;
+                left = Math.min(-hw,p.x);
+                right = Math.max(p.x,-hw);
                 break;
         }
 
@@ -434,7 +449,7 @@ export default class UiColorBarElement extends HTMLElement {
         this.#y0 = null;
         this.#rotation0 = null;
 
-        this.dispatchEvent(new Event('transform-end', { bubbles: true, cancelable: true }));
+        this.dispatchCustomEvent('transform-end',{action:'end',handle:event.target})
     }
 
     handlePointercancel = (event) => {
@@ -474,13 +489,11 @@ export default class UiColorBarElement extends HTMLElement {
                     padding: 0;
                     left: var(--left,0);
                     top: var(--top,0);
-                    // left: 0;
-                    // top: 0;
                     width: var(--width,0);
                     height: var(--height,0);
                     transform: rotate(var(--rotation,0deg));
-                    // transform: translate(var(--left,0), var(--top,0)) rotate(var(--rotation,0deg));
                     pointer-events: none;
+                    z-index: 3;
                 }
                 :host::part(wapper){
                     pointer-events: none;
@@ -514,34 +527,17 @@ export default class UiColorBarElement extends HTMLElement {
                     background-color: #fff;
                     transform: translate(-50%, -50%);
                 }
-                :host .resize-handle[data-resize='nw']{
-                    left:0;top:0;
-                }
-                :host .resize-handle[data-resize='n']{
-                    left:50%;top:0;
-                }
-                :host .resize-handle[data-resize='ne']{
-                    left:100%;top:0;
-                }
-                :host .resize-handle[data-resize='w']{
-                    left:0;top:50%;
-                }
-                :host .resize-handle[data-resize='c']{
-                    left:50%;top:50%;
-                    display: none;
-                }
-                :host .resize-handle[data-resize='e']{
-                    left:100%;top:50%;
-                }
-                :host .resize-handle[data-resize='sw']{
-                    left:0;top:100%;
-                }
-                :host .resize-handle[data-resize='s']{
-                    left:50%;top:100%;
-                }
-                :host .resize-handle[data-resize='se']{
-                    left:100%;top:100%;
-                }
+
+                :host .resize-handle[data-resize='nw']{ left:0;     top:0;   }
+                :host .resize-handle[data-resize='n'] { left:50%;   top:0;   }
+                :host .resize-handle[data-resize='ne']{ left:100%;  top:0;   }
+                :host .resize-handle[data-resize='w'] { left:0;     top:50%; }
+                :host .resize-handle[data-resize='c'] { left:50%;   top:50%; display: none; }
+                :host .resize-handle[data-resize='e'] { left:100%;  top:50%; }
+                :host .resize-handle[data-resize='sw']{ left:0;     top:100%; }
+                :host .resize-handle[data-resize='s'] { left:50%;   top:100%; }
+                :host .resize-handle[data-resize='se']{ left:100%;  top:100%; }
+
                 :host .rotate-handle-wrap{
                     z-index: 2;
                     position: absolute;
@@ -573,17 +569,17 @@ export default class UiColorBarElement extends HTMLElement {
             <div part="wapper" class="wapper">
                 <div part="border"></div>
                 <div part="handles" data-move="move">
-                    <div part="resize-handle resize-handle-c" class="resize-handle" data-resize="c" data-move="move"></div>
+                    <div part="resize-handle resize-handle-c" class="resize-handle resize-handle-c" data-resize="c" data-move="move"></div>
 
-                    <div part="resize-handle resize-handle-nw" class="resize-handle" data-resize="nw"></div>
-                    <div part="resize-handle resize-handle-n" class="resize-handle" data-resize="n"></div>
-                    <div part="resize-handle resize-handle-ne" class="resize-handle" data-resize="ne"></div>
-                    <div part="resize-handle resize-handle-w" class="resize-handle" data-resize="w"></div>
+                    <div part="resize-handle resize-handle-nw" class="resize-handle resize-handle-nw" data-resize="nw"></div>
+                    <div part="resize-handle resize-handle-n" class="resize-handle resize-handle-n" data-resize="n"></div>
+                    <div part="resize-handle resize-handle-ne" class="resize-handle resize-handle-ne" data-resize="ne"></div>
+                    <div part="resize-handle resize-handle-w" class="resize-handle resize-handle-w" data-resize="w"></div>
 
-                    <div part="resize-handle resize-handle-e" class="resize-handle" data-resize="e"></div>
-                    <div part="resize-handle resize-handle-sw" class="resize-handle" data-resize="sw"></div>
-                    <div part="resize-handle resize-handle-s" class="resize-handle" data-resize="s"></div>
-                    <div part="resize-handle resize-handle-se" class="resize-handle" data-resize="se"></div>
+                    <div part="resize-handle resize-handle-e" class="resize-handle resize-handle-e" data-resize="e"></div>
+                    <div part="resize-handle resize-handle-sw" class="resize-handle resize-handle-sw" data-resize="sw"></div>
+                    <div part="resize-handle resize-handle-s" class="resize-handle resize-handle-s" data-resize="s"></div>
+                    <div part="resize-handle resize-handle-se" class="resize-handle resize-handle-se" data-resize="se"></div>
                     <div part="rotate-handle-wrap" class="rotate-handle-wrap">
                         <div part="rotate-handle" class="rotate-handle" data-rotate="rotate"></div>
                     </div>

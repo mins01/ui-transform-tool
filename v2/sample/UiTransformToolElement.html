@@ -50,6 +50,10 @@
             height: var(--height,0) !important;
             transform: rotate(var(--rotation,0deg)) !important;
         }
+
+        ui-transform-tool:not(.has-target){
+            display: none;
+        }
     </style>
     
 </head>
@@ -65,19 +69,20 @@
         <h2>ex</h2>
         <div class="my-3" style="height: 200vh;" >
             <div class="d-flex gap-3 flex-wrap">
-                <div class="transform-tool-target rounded border border-1 box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">1</div>
-                <div class="transform-tool-target rounded border border-1 box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">2</div>
-                <div class="transform-tool-target rounded border border-1 box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">3</div>
-                <div class="transform-tool-target rounded border border-1 box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">4</div>
-                <div class="transform-tool-target rounded border border-1 box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">5</div>    
+                <div class="transform-tool-target rounded text-bg-success box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">1</div>
+                <div class="transform-tool-target rounded text-bg-success box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">2</div>
+                <div class="transform-tool-target rounded text-bg-success box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">3</div>
+                <div class="transform-tool-target rounded text-bg-success box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">4</div>
+                <div class="transform-tool-target rounded text-bg-success box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">5</div>    
             </div>
-            <div class="transform-tool-target position-absolute rounded border border-1 box-shadow text-bg-primary" style="--width:200px;--height:200px;--left:400px;--top:200px;" onclick="tft01.setTarget(this);">이동가능</div>
-            <div class="transform-tool-target position-absolute rounded border border-1 box-shadow text-bg-info" style="--width:100px;--height:100px;--left:130px;--top:100px;" onclick="tft01.setTarget(this);">이동가능</div>
+            <div class="transform-tool-target position-absolute rounded  box-shadow text-bg-primary" style="--width:200px;--height:200px;--left:400px;--top:200px;" onclick="tft01.setTarget(this);">setTarget</div>
+            <div class="transform-tool-target position-absolute rounded  box-shadow text-bg-info" style="--width:80px;--height:80px;--left:100px;--top:100px;" onclick="tft01.setTarget(this);">setTarget</div>
+            <div class="transform-tool-target position-absolute rounded  box-shadow text-bg-info" style="--width:80px;--height:80px;--left:100px;--top:200px;" data-transform-tool-no-sync onclick="tft01.setTarget(this);">data-transform-tool-no-sync target 연결민하고 싱크 동작 한다. 하고 싶으면 event 에서 처리.</div>
             
         </div>
     </div>
     
-    <ui-transform-tool id="tft01" style="min-width:20px;min-height:20px;" left="100" top="300" width="123" height="214">111</ui-transform-tool>
+    <ui-transform-tool id="tft01" style="min-width:20px;min-height:20px;" left="100" top="300" width="123" height="214"></ui-transform-tool>
     <script>
         let syncTarget = null
         const tft01 = document.getElementById("tft01");
@@ -98,11 +103,30 @@
         // tft01.addEventListener('transform-move', fn)
         // tft01.addEventListener('transform-resize', fn)
         // tft01.addEventListener('transform-rotate', fn)
-        // tft01.addEventListener('transform-target-change', (e)=>{
-        //     const target = e.target
-        //     console.log(e.type,target.left,target.top,target.width,target.height,target.rotation)
-        //     // syncTarget = e.detail.target
-        // })
+ 
+        const fn1 = (e) => { const target = e.target
+            console.log(e.type,target.left,target.top,target.width,target.height,target.rotation,event.detail) 
+        };
+        tft01.addEventListener('transform-start', fn1);
+        tft01.addEventListener('transform-update', fn1);
+        tft01.addEventListener('transform-end', fn1);
+        tft01.addEventListener('transform-target-change', fn1);
+        tft01.addEventListener('transform-target-sync', fn1);
+        window.addEventListener('click', (e) => {
+            if(!e.target.matches('.transform-tool-target, ui-transform-tool')){ tft01.setTarget(null); return false; } 
+        });
+
+        {
+            // 이벤트 수동 처리. 동작 종료 후 1초뒤 적용한다.
+            tft01.addEventListener('transform-end', (e) => {  
+                if(e.detail.target && e.detail.target.hasAttribute('data-transform-tool-no-sync')){
+                    tft01.syncTo(e.detail.target);
+                    return; 
+                }
+            });
+
+        }
+        
 
         
     </script>
