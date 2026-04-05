@@ -32,36 +32,36 @@ export default class UiColorBarElement extends HTMLElement {
      * fields
      * ========================= */
 
-    _left = 0;
-    _top = 0;
-    _width = 0;
-    _height = 0;
-    _rotation = 0; //deg
+    #left = 0;
+    #top = 0;
+    #width = 0;
+    #height = 0;
+    #rotation = 0; //deg
     zoom = 1;
 
-    _rotation0 = null;
-    _left0 = null;
-    _top0 = null;
-    _x0 = null;
-    _y0 = null;
-    _rect = null;
+    #rotation0 = null;
+    #left0 = null;
+    #top0 = null;
+    #x0 = null;
+    #y0 = null;
+    #rect = null;
 
-    _transformType = null;
-    _resizeType = null;
+    #transformType = null;
+    #resizeType = null;
 
     /* =========================
      * getter / setter
      * ========================= */
-    get left() { return this._left; }
-    get top() { return this._top; }
-    get width() { return this._width; }
-    get height() { return this._height; }
-    get rotation() { return this._rotation; }
-    set left(v) { this._left = v; this.applyStyle(); }
-    set top(v) { this._top = v; this.applyStyle(); }
-    set width(v) { this._width = v; this.applyStyle(); }
-    set height(v) { this._height = v; this.applyStyle(); }
-    set rotation(v) { this._rotation = v; this.applyStyle(); }
+    get left() { return this.#left; }
+    get top() { return this.#top; }
+    get width() { return this.#width; }
+    get height() { return this.#height; }
+    get rotation() { return this.#rotation; }
+    set left(v) { this.#left = v; this.applyStyle(); }
+    set top(v) { this.#top = v; this.applyStyle(); }
+    set width(v) { this.#width = v; this.applyStyle(); }
+    set height(v) { this.#height = v; this.applyStyle(); }
+    set rotation(v) { this.#rotation = v; this.applyStyle(); }
 
     /* =========================
      * constructor
@@ -100,10 +100,10 @@ export default class UiColorBarElement extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
-        if (name === 'left') this._left = Number(newValue);
-        if (name === 'top') this._top = Number(newValue);
-        if (name === 'width') this._width = Number(newValue);
-        if (name === 'height') this._height = Number(newValue);
+        if (name === 'left') this.#left = Number(newValue);
+        if (name === 'top') this.#top = Number(newValue);
+        if (name === 'width') this.#width = Number(newValue);
+        if (name === 'height') this.#height = Number(newValue);
     }
 
     /* =========================
@@ -111,21 +111,21 @@ export default class UiColorBarElement extends HTMLElement {
      * ========================= */
 
     moveTo(left, top) {
-        this._left = left;
-        this._top = top;
+        this.#left = left;
+        this.#top = top;
         this.applyStyle();
     }
     resizeTo(width, height) {
-        this._width = width;
-        this._height = height;
+        this.#width = width;
+        this.#height = height;
         this.applyStyle();
     }
     setRect(left, top, width, height, rotation=null) {
-        this._left = left;
-        this._top = top;
-        this._width = width;
-        this._height = height;
-        if(rotation!=null) this._rotation = rotation
+        this.#left = left;
+        this.#top = top;
+        this.#width = width;
+        this.#height = height;
+        if(rotation!=null) this.#rotation = rotation
         this.applyStyle();
     }
     target = null;
@@ -158,7 +158,7 @@ export default class UiColorBarElement extends HTMLElement {
         this.applyStyle(target)
     }
     rotateTo(rotation) {
-        this._rotation = rotation;
+        this.#rotation = rotation;
         this.applyStyle();
     }
     /* =========================
@@ -184,11 +184,11 @@ export default class UiColorBarElement extends HTMLElement {
         };
     }
     applyStyle(target=this) {
-        target.style.setProperty('--left', this._left + 'px');
-        target.style.setProperty('--top', this._top + 'px');
-        target.style.setProperty('--width', this._width + 'px');
-        target.style.setProperty('--height', this._height + 'px');
-        target.style.setProperty('--rotation', this._rotation + 'deg');
+        target.style.setProperty('--left', this.#left + 'px');
+        target.style.setProperty('--top', this.#top + 'px');
+        target.style.setProperty('--width', this.#width + 'px');
+        target.style.setProperty('--height', this.#height + 'px');
+        target.style.setProperty('--rotation', this.#rotation + 'deg');
         // this.style.setProperty('--zoom', this.zoom);
     }
 
@@ -218,9 +218,9 @@ export default class UiColorBarElement extends HTMLElement {
         }
     }
 
-    _fixedWorld = null;
-    _width0;
-    _height0;
+    #fixedWorld = null;
+    #width0;
+    #height0;
     handlePointerdown = (event) => {
         // const eventElement = event.composedPath()[0]; // 최초 이벤트 발생 요소 지정
         const target = event.target; // 최초 이벤트 발생 요소 지정
@@ -230,45 +230,49 @@ export default class UiColorBarElement extends HTMLElement {
         if (!target) {
             return;
         } else if (target.dataset.move) {
-            this._transformType = 'move'
-            this._left0 = this._left;
-            this._top0 = this._top;
-            this._x0 = event.clientX;
-            this._y0 = event.clientY;
+            this.#transformType = 'move'
+            this.#left0 = this.#left;
+            this.#top0 = this.#top;
+            this.#x0 = event.pageX;
+            this.#y0 = event.pageY;
         } else if (target.dataset.rotate) {
-            this._transformType = 'rotate'
-            this._rotation0 = this._rotation;
-            this._x0 = this._left + this._width / 2;
-            this._y0 = this._top + this._height / 2;
+            this.#transformType = 'rotate'
+            this.#rotation0 = this.#rotation;
+            this.#x0 = this.#left + this.#width / 2;
+            this.#y0 = this.#top + this.#height / 2;
         } else if (target.dataset.resize) {
-            this._handlePointerdownForResize(event);
+            this.#handlePointerdownForResize(event);
         }
 
 
-        // this._rect = this.getBoundingClientRect();
+        // this.#rect = this.getBoundingClientRect();
 
         this.dispatchEvent(new Event('transform-start', { bubbles: true, cancelable: true }));
     }
-    _handlePointerdownForResize(event) {
-        this._transformType = 'resize';
-        this._resizeType = event.target.dataset.resize;
+    #cx0 = null
+    #cy0 = null
+    #anchorLocal = null
+    #startLocal = null
+    #handlePointerdownForResize(event) {
+        this.#transformType = 'resize';
+        this.#resizeType = event.target.dataset.resize;
 
-        this._rotation0 = this._rotation;
+        this.#rotation0 = this.#rotation;
 
-        this._left0 = this._left;
-        this._top0 = this._top;
-        this._width0 = this._width;
-        this._height0 = this._height;
+        this.#left0 = this.#left;
+        this.#top0 = this.#top;
+        this.#width0 = this.#width;
+        this.#height0 = this.#height;
 
         // 🔥 회전 기준 center (고정)
-        this._cx0 = this._left + this._width / 2;
-        this._cy0 = this._top + this._height / 2;
+        this.#cx0 = this.#left + this.#width / 2;
+        this.#cy0 = this.#top + this.#height / 2;
 
         // 🔥 anchor를 local 좌표로 저장
-        this._anchorLocal = this._getAnchorLocal(this._resizeType);
+        this.#anchorLocal = this.#getAnchorLocal(this.#resizeType);
 
         // 🔥 시작 포인터도 local
-        this._startLocal = this._toLocal(event.clientX, event.clientY);
+        this.#startLocal = this.#toLocal(event.pageX, event.pageY);
     }
 
     handlePointermove = (event) => {
@@ -279,36 +283,36 @@ export default class UiColorBarElement extends HTMLElement {
         // 월드 좌표
 
 
-        if (this._transformType === 'move') {
-            const x1 = event.clientX;
-            const y1 = event.clientY;
-            const left = this._left0 + x1 - this._x0;
-            const top = this._top0 + y1 - this._y0;
+        if (this.#transformType === 'move') {
+            const x1 = event.pageX;
+            const y1 = event.pageY;
+            const left = this.#left0 + x1 - this.#x0;
+            const top = this.#top0 + y1 - this.#y0;
             this.moveTo(left, top);
             this.dispatchEvent(new Event('transform-move', { bubbles: true, cancelable: true }));
             this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
-        } else if (this._transformType === 'rotate') {
-            const x1 = event.clientX;
-            const y1 = event.clientY;
-            const rad = Math.atan2(y1 - this._y0, x1 - this._x0);
+        } else if (this.#transformType === 'rotate') {
+            const x1 = event.pageX;
+            const y1 = event.pageY;
+            const rad = Math.atan2(y1 - this.#y0, x1 - this.#x0);
             const rotation = (rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
 
             this.rotateTo(rotation);
             this.dispatchEvent(new Event('transform-rotate', { bubbles: true, cancelable: true }));
             this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
-        } else if (this._transformType === 'resize') {
-            this._handlePointermoveForResize(event);
+        } else if (this.#transformType === 'resize') {
+            this.#handlePointermoveForResize(event);
             this.dispatchEvent(new Event('transform-resize', { bubbles: true, cancelable: true }));
             this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
         }
 
     }
 
-    _toLocal(x, y) {
-        const rad = -this._rotation0 * Math.PI / 180;
+    #toLocal(x, y) {
+        const rad = -this.#rotation0 * Math.PI / 180;
 
-        const dx = x - this._cx0;
-        const dy = y - this._cy0;
+        const dx = x - this.#cx0;
+        const dy = y - this.#cy0;
 
         return {
             x: dx * Math.cos(rad) - dy * Math.sin(rad),
@@ -316,9 +320,9 @@ export default class UiColorBarElement extends HTMLElement {
         };
     }
 
-    _getAnchorLocal(type) {
-        const w = this._width0;
-        const h = this._height0;
+    #getAnchorLocal(type) {
+        const w = this.#width0;
+        const h = this.#height0;
 
         switch (type) {
             case "se": return { x: -w / 2, y: -h / 2 };
@@ -333,25 +337,25 @@ export default class UiColorBarElement extends HTMLElement {
         }
     }
 
-    _handlePointermoveForResize(event) {
-        const p = this._toLocal(event.clientX, event.clientY);
+    #handlePointermoveForResize(event) {
+        const p = this.#toLocal(event.pageX, event.pageY);
 
         let left, right, top, bottom;
 
-        const w0 = this._width0;
-        const h0 = this._height0;
+        const w0 = this.#width0;
+        const h0 = this.#height0;
 
         const hw = w0 / 2;
         const hh = h0 / 2;
 
-        switch (this._resizeType) {
+        switch (this.#resizeType) {
 
             // 🔥 corner (기존 방식 유지)
             case "se":
             case "nw":
             case "ne":
             case "sw": {
-                const a = this._anchorLocal;
+                const a = this.#anchorLocal;
 
                 left = Math.min(a.x, p.x);
                 right = Math.max(a.x, p.x);
@@ -400,15 +404,15 @@ export default class UiColorBarElement extends HTMLElement {
         const cyLocal = (top + bottom) / 2;
 
         // 🔥 world 변환
-        const rad = this._rotation0 * Math.PI / 180;
+        const rad = this.#rotation0 * Math.PI / 180;
 
         const cxWorld =
-            this._cx0 +
+            this.#cx0 +
             cxLocal * Math.cos(rad) -
             cyLocal * Math.sin(rad);
 
         const cyWorld =
-            this._cy0 +
+            this.#cy0 +
             cxLocal * Math.sin(rad) +
             cyLocal * Math.cos(rad);
 
@@ -424,11 +428,11 @@ export default class UiColorBarElement extends HTMLElement {
         target.removeEventListener('pointermove', this.handlePointermove);
         target.releasePointerCapture(event.pointerId);
 
-        this._left0 = null;
-        this._top0 = null;
-        this._x0 = null;
-        this._y0 = null;
-        this._rotation0 = null;
+        this.#left0 = null;
+        this.#top0 = null;
+        this.#x0 = null;
+        this.#y0 = null;
+        this.#rotation0 = null;
 
         this.dispatchEvent(new Event('transform-end', { bubbles: true, cancelable: true }));
     }
@@ -448,7 +452,7 @@ export default class UiColorBarElement extends HTMLElement {
     // }
 
     // toJSON() {
-    //     return { value: this._value };
+    //     return { value: this.#value };
     // }
 
     /* =========================
@@ -465,7 +469,7 @@ export default class UiColorBarElement extends HTMLElement {
                     display: block;
                     min-width: 10px;
                     min-height: 10px;
-                    position: fixed;
+                    position: absolute;
                     margin: 0;
                     padding: 0;
                     left: var(--left,0);
