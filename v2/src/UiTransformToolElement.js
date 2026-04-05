@@ -174,10 +174,8 @@ export default class UiColorBarElement extends HTMLElement {
             this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
         }
     }
-    #cx0 = 0;
-    #cy0 = 0;
+    
     #fixedWorld = null;
-    #handle;
     #width0;
     #height0;
     handlePointerdown = (event) => {
@@ -202,51 +200,37 @@ export default class UiColorBarElement extends HTMLElement {
         }else if(target.dataset.resize){
             this._transformType = 'resize';
             this._resizeType = target.dataset.resize;
-            this.#handle = target.dataset.resize;
 
-    this.#rotation0 = this.#rotation;
+            this.#rotation0 = this.#rotation;
 
-    this.#left0 = this.#left;
-    this.#top0 = this.#top;
-    this.#width0 = this.#width;
-    this.#height0 = this.#height;
+            this.#left0 = this.#left;
+            this.#top0 = this.#top;
+            this.#width0 = this.#width;
+            this.#height0 = this.#height;
 
-    const cx = this.#left + this.#width / 2;
-    const cy = this.#top  + this.#height / 2;
+            const cx = this.#left + this.#width / 2;
+            const cy = this.#top  + this.#height / 2;
 
-    this.#cx0 = cx;
-    this.#cy0 = cy;
+            // 고정점 (반대편 코너)
+            let fx, fy;
+            switch (this._resizeType) {
+                case "se": fx = this.#left; fy = this.#top; break;
+                case "nw": fx = this.#left + this.#width; fy = this.#top + this.#height; break;
+                case "ne": fx = this.#left; fy = this.#top + this.#height; break;
+                case "sw": fx = this.#left + this.#width; fy = this.#top; break;
+                case "n": fx = this.#left + this.#width / 2; fy = this.#top + this.#height; break;
+                case "s": fx = this.#left + this.#width / 2; fy = this.#top; break;
+                case "w": fx = this.#left + this.#width; fy = this.#top + this.#height / 2; break;
+                case "e": fx = this.#left; fy = this.#top + this.#height / 2; break;
+            }
 
-    // 🔥 고정점 (반대편 코너)
-    let fx, fy;
+            // world 좌표로 고정 점 저장
+            this.#fixedWorld = this.rotatePoint(fx, fy, cx, cy, this.#rotation);
 
-    switch (this.#handle) {
-        case "se": fx = this.#left; fy = this.#top; break;
-        case "nw": fx = this.#left + this.#width; fy = this.#top + this.#height; break;
-        case "ne": fx = this.#left; fy = this.#top + this.#height; break;
-        case "sw": fx = this.#left + this.#width; fy = this.#top; break;
+            // 처음 클릭 위치. 사용 안할 듯
+            this.#x0 = event.clientX;
+            this.#y0 = event.clientY;
 
-                // 🔥 엣지 (중앙 반대편)
-        case "n": fx = this.#left + this.#width / 2; fy = this.#top + this.#height; break;
-        case "s": fx = this.#left + this.#width / 2; fy = this.#top; break;
-        case "w": fx = this.#left + this.#width; fy = this.#top + this.#height / 2; break;
-        case "e": fx = this.#left; fy = this.#top + this.#height / 2; break;
-    }
-
-    // 👉 world 좌표로 저장
-    this.#fixedWorld = this.rotatePoint(fx, fy, cx, cy, this.#rotation);
-            // if(this._resizeType.includes('s')){
-            //     this.#y0 = this.#top;
-            // }
-            // if(this._resizeType.includes('n')){
-            //     this.#y0 = this.#top+this.#height;
-            // }
-            // if(this._resizeType.includes('e')){
-            //     this.#x0 = this.#left;
-            // }
-            // if(this._resizeType.includes('w')){
-            //     this.#x0 = this.#left+this.#width;
-            // }
         }
 
 
@@ -260,8 +244,9 @@ export default class UiColorBarElement extends HTMLElement {
         if (!target.hasPointerCapture(event.pointerId)) return;
 
 
-        const x1 = event.clientX;
-        const y1 = event.clientY;
+        // 월드 좌표
+        let x1 = event.clientX;
+        let y1 = event.clientY;
 
         if(this._transformType==='move'){
             const left = this.#left0 + x1 - this.#x0;
@@ -279,22 +264,17 @@ export default class UiColorBarElement extends HTMLElement {
             this.dispatchEvent(new Event('transform-rotate', { bubbles: true, cancelable: true }));
             this.dispatchEvent(new Event('transform-update', { bubbles: true, cancelable: true }));
         }else if(this._transformType==='resize'){
-            const angle = this.#rotation0;
-            const e = event;
-            const fixedWorld = this.#fixedWorld;
-            const dragWorld = { x: e.clientX, y: e.clientY };
-
-            // 🔥 center를 매번 재계산 (포토샵 핵심)
-            const cx = (fixedWorld.x + dragWorld.x) / 2;
-            const cy = (fixedWorld.y + dragWorld.y) / 2;
+            // center를 매번 재계산
+            const cx = (this.#fixedWorld.x + x1) / 2;
+            const cy = (this.#fixedWorld.y + y1) / 2;
 
             // world → local (회전 제거)
-            const fixed = this.rotatePoint(fixedWorld.x, fixedWorld.y, cx, cy, -angle);
-            const drag  = this.rotatePoint(dragWorld.x, dragWorld.y, cx, cy, -angle);
+            const fixed = this.rotatePoint(this.#fixedWorld.x, this.#fixedWorld.y, cx, cy, -this.#rotation0);
+            const drag  = this.rotatePoint(x1, y1, cx, cy, -this.#rotation0);
 
             let left, top, width, height;
 
-            switch (this.#handle) {
+            switch (this._resizeType) {
                 case "se":
                     left   = fixed.x;
                     top    = fixed.y;
@@ -340,6 +320,7 @@ export default class UiColorBarElement extends HTMLElement {
                 case "w":
                     left = drag.x;
                     top = fixed.y - (this.#height0 / 2);
+                    top = fixed.y;
                     width = fixed.x - drag.x;
                     height = this.#height0;
                     break;
