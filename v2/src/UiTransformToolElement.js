@@ -48,7 +48,6 @@ export default class UiColorBarElement extends HTMLElement {
     #top0 = null;
     #x0 = null;
     #y0 = null;
-    #rect = null;
 
     #transformType = null;
     #resizeType = null;
@@ -81,7 +80,12 @@ export default class UiColorBarElement extends HTMLElement {
      * ========================= */
 
     connectedCallback() {
-        if (!this.shadowRoot.firstChild) this.render();
+        if (!this.shadowRoot.firstChild){
+            this.render();
+            if(!this.hasAttribute('data-resize-origin')){
+                this.dataset.resizeOrigin = "edge"; // edge, center
+            }
+        }
         this.applyStyle();
         const wapper = this.shadowRoot.querySelector('.wapper') //this가 아니라 내부 요소로 해야 event.target이 내부 요소로 나온다.
         wapper.addEventListener('dblclick', this.handleDblclick);
@@ -283,15 +287,15 @@ export default class UiColorBarElement extends HTMLElement {
         this.#width0 = this.#width;
         this.#height0 = this.#height;
 
-        // 🔥 회전 기준 center (고정)
+        // 회전 기준 center (고정)
         this.#cx0 = this.#left + this.#width / 2;
         this.#cy0 = this.#top + this.#height / 2;
 
-        // 🔥 anchor를 local 좌표로 저장
+        // anchor를 local 좌표로 저장
         this.#anchorLocal = this.#getAnchorLocal(this.#resizeType);
 
-        // 🔥 시작 포인터도 local
-        this.#startLocal = this.#toLocal(event.pageX, event.pageY);
+        // 시작 포인터도 local
+        this.#startLocal = this.#toLocal(event.pageX, event.pageY); //다른 곳에서 사용안함.
     }
 
     handlePointermove = (event) => {
@@ -318,12 +322,21 @@ export default class UiColorBarElement extends HTMLElement {
             this.rotateTo(rotation);
             this.dispatchCustomEvent('transform-update',{action:'rotate',handle:event.target})
         } else if (this.#transformType === 'resize') {
-            this.#handlePointermoveForResize(event);
+            this.handlePointermoveForResize(event)           
             this.dispatchCustomEvent('transform-update',{action:'resize',handle:event.target})
         }
 
     }
 
+
+
+    handlePointermoveForResize(event) {
+        const origin = this.dataset.resizeOrigin ?? "edge";
+        if (origin === "center") {
+            return this.#resizeFromCenter(event);
+        }
+        return this.#resizeFromEdge(event);
+    }
     #toLocal(x, y) {
         const rad = -this.#rotation0 * Math.PI / 180;
 
@@ -353,7 +366,8 @@ export default class UiColorBarElement extends HTMLElement {
         }
     }
 
-    #handlePointermoveForResize(event) {
+    // 반대편 기준 리사이즈
+    #resizeFromEdge(event) {
         const p = this.#toLocal(event.pageX, event.pageY);
 
         let left, right, top, bottom;
@@ -366,7 +380,7 @@ export default class UiColorBarElement extends HTMLElement {
 
         switch (this.#resizeType) {
 
-            // 🔥 corner (기존 방식 유지)
+            // corner (기존 방식 유지)
             case "se":
             case "nw":
             case "ne":
@@ -380,7 +394,7 @@ export default class UiColorBarElement extends HTMLElement {
                 break;
             }
 
-            // 🔥 edge (완전히 다르게 처리)
+            // edge (완전히 다르게 처리)
 
             case "n":
                 left = -hw;
@@ -410,15 +424,15 @@ export default class UiColorBarElement extends HTMLElement {
                 break;
         }
 
-        // 🔥 width/height
+        // width/height
         let width = right - left;
         let height = bottom - top;
 
-        // 🔥 center (local)
+        // center (local)
         const cxLocal = (left + right) / 2;
         const cyLocal = (top + bottom) / 2;
 
-        // 🔥 world 변환
+        // world 변환
         const rad = this.#rotation0 * Math.PI / 180;
 
         const cxWorld =
@@ -430,6 +444,76 @@ export default class UiColorBarElement extends HTMLElement {
             this.#cy0 +
             cxLocal * Math.sin(rad) +
             cyLocal * Math.cos(rad);
+
+        const newLeft = cxWorld - width / 2;
+        const newTop = cyWorld - height / 2;
+
+        this.setRect(newLeft, newTop, width, height);
+    }
+
+    // 중심 기준 대칭 리사이즈
+    #resizeFromCenter(event) {
+        const p = this.#toLocal(event.pageX, event.pageY);
+
+        let left, right, top, bottom;
+
+        const w0 = this.#width0;
+        const h0 = this.#height0;
+
+        const hw = w0 / 2;
+        const hh = h0 / 2;
+
+        switch (this.#resizeType) {
+
+            // corner → 중심 기준 대칭 확장
+            case "se":
+            case "nw":
+            case "ne":
+            case "sw": {
+                const dx = p.x;
+                const dy = p.y;
+
+                left = -Math.abs(dx);
+                right = Math.abs(dx);
+                top = -Math.abs(dy);
+                bottom = Math.abs(dy);
+                break;
+            }
+
+            // edge
+
+            case "n":
+            case "s": {
+                const dy = p.y;
+
+                left = -hw;
+                right = hw;
+
+                top = -Math.abs(dy);
+                bottom = Math.abs(dy);
+                break;
+            }
+
+            case "e":
+            case "w": {
+                const dx = p.x;
+
+                top = -hh;
+                bottom = hh;
+
+                left = -Math.abs(dx);
+                right = Math.abs(dx);
+                break;
+            }
+        }
+
+        // width / height
+        const width = right - left;
+        const height = bottom - top;
+
+        // 중심은 변하지 않음 (핵심!)
+        const cxWorld = this.#cx0;
+        const cyWorld = this.#cy0;
 
         const newLeft = cxWorld - width / 2;
         const newTop = cyWorld - height / 2;
