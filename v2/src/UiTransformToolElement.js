@@ -275,7 +275,11 @@ export default class UiColorBarElement extends HTMLElement {
     #cx0 = null
     #cy0 = null
     #anchorLocal = null
-    #startLocal = null
+    #handleLocal = null
+    #startWorldX = null
+    #startWorldY = null
+    #anchorWorldX = null
+    #anchorWorldY = null
     #handlePointerdownForResize(event) {
         this.#transformType = 'resize';
         this.#resizeType = event.target.dataset.resize;
@@ -291,11 +295,19 @@ export default class UiColorBarElement extends HTMLElement {
         this.#cx0 = this.#left + this.#width / 2;
         this.#cy0 = this.#top + this.#height / 2;
 
-        // anchor를 local 좌표로 저장
+        // anchor/handle을 local 좌표로 저장
         this.#anchorLocal = this.#getAnchorLocal(this.#resizeType);
+        this.#handleLocal = this.#getHandleLocal(this.#resizeType);
 
-        // 시작 포인터도 local
-        this.#startLocal = this.#toLocal(event.pageX, event.pageY); //다른 곳에서 사용안함.
+        // 시작 포인터 world 좌표 저장 (delta 계산용)
+        this.#startWorldX = event.pageX;
+        this.#startWorldY = event.pageY;
+
+        // anchor의 world 좌표 (드래그 중 고정)
+        const rad = this.#rotation0 * Math.PI / 180;
+        const a = this.#anchorLocal;
+        this.#anchorWorldX = this.#cx0 + a.x * Math.cos(rad) - a.y * Math.sin(rad);
+        this.#anchorWorldY = this.#cy0 + a.x * Math.sin(rad) + a.y * Math.cos(rad);
     }
 
     handlePointermove = (event) => {
@@ -337,16 +349,19 @@ export default class UiColorBarElement extends HTMLElement {
         }
         return this.#resizeFromEdge(event);
     }
-    #toLocal(x, y) {
-        const rad = -this.#rotation0 * Math.PI / 180;
-
-        const dx = x - this.#cx0;
-        const dy = y - this.#cy0;
-
-        return {
-            x: dx * Math.cos(rad) - dy * Math.sin(rad),
-            y: dx * Math.sin(rad) + dy * Math.cos(rad),
-        };
+    #getHandleLocal(type) {
+        const w = this.#width0;
+        const h = this.#height0;
+        switch (type) {
+            case "nw": return { x: -w / 2, y: -h / 2 };
+            case "n":  return { x: 0,       y: -h / 2 };
+            case "ne": return { x:  w / 2,  y: -h / 2 };
+            case "w":  return { x: -w / 2,  y: 0 };
+            case "e":  return { x:  w / 2,  y: 0 };
+            case "sw": return { x: -w / 2,  y:  h / 2 };
+            case "s":  return { x: 0,       y:  h / 2 };
+            case "se": return { x:  w / 2,  y:  h / 2 };
+        }
     }
 
     #getAnchorLocal(type) {
@@ -366,102 +381,81 @@ export default class UiColorBarElement extends HTMLElement {
         }
     }
 
+    // delta를 local 좌표로 변환
+    #deltaToLocal(event) {
+        const rad = -this.#rotation0 * Math.PI / 180;
+        const dwx = event.pageX - this.#startWorldX;
+        const dwy = event.pageY - this.#startWorldY;
+        return {
+            x: dwx * Math.cos(rad) - dwy * Math.sin(rad),
+            y: dwx * Math.sin(rad) + dwy * Math.cos(rad),
+        };
+    }
+
     // 반대편 기준 리사이즈
     #resizeFromEdge(event) {
-        const p = this.#toLocal(event.pageX, event.pageY);
+        // delta 기반: 핸들 초기 위치 + 포인터 이동량(local)
+        const d = this.#deltaToLocal(event);
+        const h = this.#handleLocal;
+        const p = { x: h.x + d.x, y: h.y + d.y };
+        const a = this.#anchorLocal;
+
+        const hw = this.#width0 / 2;
+        const hh = this.#height0 / 2;
 
         let left, right, top, bottom;
 
-        const w0 = this.#width0;
-        const h0 = this.#height0;
-
-        const hw = w0 / 2;
-        const hh = h0 / 2;
-
         switch (this.#resizeType) {
-
-            // corner (기존 방식 유지)
-            case "se":
-            case "nw":
-            case "ne":
-            case "sw": {
-                const a = this.#anchorLocal;
-
-                left = Math.min(a.x, p.x);
-                right = Math.max(a.x, p.x);
-                top = Math.min(a.y, p.y);
+            case "se": case "nw": case "ne": case "sw":
+                left   = Math.min(a.x, p.x);
+                right  = Math.max(a.x, p.x);
+                top    = Math.min(a.y, p.y);
                 bottom = Math.max(a.y, p.y);
                 break;
-            }
 
-            // edge (완전히 다르게 처리)
-
-            case "n":
-                left = -hw;
-                right = hw;
-                bottom = Math.max(hh,p.y);
-                top = Math.min(p.y,hh);
+            case "n": case "s":
+                left   = -hw;
+                right  =  hw;
+                top    = Math.min(a.y, p.y);
+                bottom = Math.max(a.y, p.y);
                 break;
 
-            case "s":
-                left = -hw;
-                right = hw;
-                top = Math.min(-hh,p.y);
-                bottom = Math.max(p.y,-hh);
-                break;
-            case "w":
-                top = -hh;
-                bottom = hh;
-                right = Math.max(hw,p.x);
-                left = Math.min(p.x,hw);
-                break;
-
-            case "e":
-                top = -hh;
-                bottom = hh;
-                left = Math.min(-hw,p.x);
-                right = Math.max(p.x,-hw);
+            case "e": case "w":
+                top    = -hh;
+                bottom =  hh;
+                left   = Math.min(a.x, p.x);
+                right  = Math.max(a.x, p.x);
                 break;
         }
 
-        // width/height
-        let width = right - left;
-        let height = bottom - top;
+        const width  = right - left;
+        const height = bottom - top;
 
-        // center (local)
-        const cxLocal = (left + right) / 2;
-        const cyLocal = (top + bottom) / 2;
+        // anchor의 new rect 내 local offset
+        const aOffX = a.x - (left + right) / 2;
+        const aOffY = a.y - (top + bottom) / 2;
 
-        // world 변환
+        // anchor world 좌표로부터 새 center 역산
         const rad = this.#rotation0 * Math.PI / 180;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+        const cxWorld = this.#anchorWorldX - (aOffX * cos - aOffY * sin);
+        const cyWorld = this.#anchorWorldY - (aOffX * sin + aOffY * cos);
 
-        const cxWorld =
-            this.#cx0 +
-            cxLocal * Math.cos(rad) -
-            cyLocal * Math.sin(rad);
-
-        const cyWorld =
-            this.#cy0 +
-            cxLocal * Math.sin(rad) +
-            cyLocal * Math.cos(rad);
-
-        const newLeft = cxWorld - width / 2;
-        const newTop = cyWorld - height / 2;
-
-        this.setRect(newLeft, newTop, width, height);
+        this.setRect(cxWorld - width / 2, cyWorld - height / 2, width, height);
     }
 
     // 중심 기준 대칭 리사이즈
     #resizeFromCenter(event) {
-        const p = this.#toLocal(event.pageX, event.pageY);
+        // delta 기반: 핸들 초기 위치 + 포인터 이동량(local)
+        const d = this.#deltaToLocal(event);
+        const h = this.#handleLocal;
+        const p = { x: h.x + d.x, y: h.y + d.y };
 
         let left, right, top, bottom;
 
-        const w0 = this.#width0;
-        const h0 = this.#height0;
-
-        const hw = w0 / 2;
-        const hh = h0 / 2;
+        const hw = this.#width0 / 2;
+        const hh = this.#height0 / 2;
 
         switch (this.#resizeType) {
 
@@ -470,13 +464,10 @@ export default class UiColorBarElement extends HTMLElement {
             case "nw":
             case "ne":
             case "sw": {
-                const dx = p.x;
-                const dy = p.y;
-
-                left = -Math.abs(dx);
-                right = Math.abs(dx);
-                top = -Math.abs(dy);
-                bottom = Math.abs(dy);
+                left = -Math.abs(p.x);
+                right = Math.abs(p.x);
+                top = -Math.abs(p.y);
+                bottom = Math.abs(p.y);
                 break;
             }
 
@@ -484,13 +475,10 @@ export default class UiColorBarElement extends HTMLElement {
 
             case "n":
             case "s": {
-                const dy = p.y;
-
                 left = -hw;
                 right = hw;
-
-                top = -Math.abs(dy);
-                bottom = Math.abs(dy);
+                top = -Math.abs(p.y);
+                bottom = Math.abs(p.y);
                 break;
             }
 
