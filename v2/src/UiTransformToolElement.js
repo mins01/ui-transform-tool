@@ -52,6 +52,8 @@ export default class UiColorBarElement extends HTMLElement {
     #transformType = null;
     #resizeType = null;
 
+    #boundary = null;
+
     /* =========================
      * getter / setter
      * ========================= */
@@ -87,14 +89,19 @@ export default class UiColorBarElement extends HTMLElement {
             }
         }
         this.applyStyle();
+        this.#boundary = this.closest('.transform-boundary');
+        this.clampToBoundary();
         const wapper = this.shadowRoot.querySelector('.wapper') //this가 아니라 내부 요소로 해야 event.target이 내부 요소로 나온다.
         wapper.addEventListener('dblclick', this.handleDblclick);
         wapper.addEventListener('pointerdown', this.handlePointerdown);
         wapper.addEventListener('pointerup', this.handlePointerup);
         wapper.addEventListener('pointercancel', this.handlePointercancel);
+        
+        
     }
 
     disconnectedCallback() {
+        this.#boundary = null;
         const wapper = this.shadowRoot.querySelector('.wapper')
         wapper.removeEventListener('dblclick', this.handleDblclick);
         wapper.removeEventListener('pointerdown', this.handlePointerdown);
@@ -269,7 +276,7 @@ export default class UiColorBarElement extends HTMLElement {
         } else if (target.dataset.resize) {
             this.#handlePointerdownForResize(event);
         }
-
+        this.clampToBoundary();
         this.dispatchCustomEvent('transform-start',{action:'start',handle:event.target})
     }
     #cx0 = null
@@ -314,16 +321,13 @@ export default class UiColorBarElement extends HTMLElement {
         const target = event.target; // 최초 이벤트 발생 요소 지정
         if (!target.hasPointerCapture(event.pointerId)) return;
 
-
-        // 월드 좌표
-
-
         if (this.#transformType === 'move') {
             const x1 = event.pageX;
             const y1 = event.pageY;
             const left = this.#left0 + x1 - this.#x0;
             const top = this.#top0 + y1 - this.#y0;
             this.moveTo(left, top);
+            this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'move',handle:event.target})
         } else if (this.#transformType === 'rotate') {
             const x1 = event.pageX;
@@ -332,9 +336,11 @@ export default class UiColorBarElement extends HTMLElement {
             const rotation = (rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
 
             this.rotateTo(rotation);
+            this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'rotate',handle:event.target})
         } else if (this.#transformType === 'resize') {
             this.handlePointermoveForResize(event)           
+            this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'resize',handle:event.target})
         }
 
@@ -515,6 +521,8 @@ export default class UiColorBarElement extends HTMLElement {
         target.removeEventListener('pointermove', this.handlePointermove);
         target.releasePointerCapture(event.pointerId);
 
+        this.clampToBoundary(false);
+
         this.#left0 = null;
         this.#top0 = null;
         this.#x0 = null;
@@ -526,6 +534,43 @@ export default class UiColorBarElement extends HTMLElement {
 
     handlePointercancel = (event) => {
         return this.handlePointerup(event);
+    }
+
+    #boundaryRect = null
+    clampToBoundary(refreshBoundaryRect = true){
+        if(this.#boundary){
+            if(refreshBoundaryRect) this.#boundaryRect = this.#boundary.getBoundingClientRect();
+            let {left,top,width,height} = this.#boundaryRect;
+            left += window.scrollX;
+            top += window.scrollY;
+            this.clampToBounds({left,top,width,height});
+        }
+    }
+    clampToBounds(bounds){
+        let { left, top, width, height } = this;
+
+        // 1. 현재 중심점
+        let cx = left + width / 2;
+        let cy = top + height / 2;
+
+        // 2. bounds 안으로 center를 clamp
+        const minX = bounds.left;
+        const maxX = bounds.left + bounds.width;
+        const minY = bounds.top;
+        const maxY = bounds.top + bounds.height;
+
+        cx = Math.max(minX, Math.min(maxX, cx));
+        cy = Math.max(minY, Math.min(maxY, cy));
+
+        // 3. center 기준으로 left/top 재계산
+        left = cx - width / 2;
+        top = cy - height / 2;
+
+        // 4. 반영
+        this.left = left;
+        this.top = top;
+
+        return this;
     }
 
     /* =========================
@@ -566,6 +611,9 @@ export default class UiColorBarElement extends HTMLElement {
                     transform: rotate(var(--rotation,0deg));
                     pointer-events: none;
                     z-index: 3;
+                }
+                :host(.show-when-has-target:not(.has-target)){
+                    display: none;
                 }
                 :host::part(wapper){
                     pointer-events: none;
