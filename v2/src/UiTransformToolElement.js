@@ -89,7 +89,8 @@ export default class UiColorBarElement extends HTMLElement {
             }
         }
         this.applyStyle();
-        this.#boundary = this.closest('.transform-boundary');
+        this.#boundary = this.closest('.transform-boundary')??document.body;
+        
         this.clampToBoundary();
         const wapper = this.shadowRoot.querySelector('.wapper') //this가 아니라 내부 요소로 해야 event.target이 내부 요소로 나온다.
         wapper.addEventListener('dblclick', this.handleDblclick);
@@ -255,6 +256,7 @@ export default class UiColorBarElement extends HTMLElement {
     #width0;
     #height0;
     #ratio0 = null
+    
     handlePointerdown = (event) => {
         // const eventElement = event.composedPath()[0]; // 최초 이벤트 발생 요소 지정
         const target = event.target; // 최초 이벤트 발생 요소 지정
@@ -269,6 +271,10 @@ export default class UiColorBarElement extends HTMLElement {
         this.classList.add('is-transforming');
 
 
+        // 바운드리 rect
+        this.#boundaryRect = this.#boundary.getBoundingClientRect();
+
+        // 비율 고정 준비
         if(this.hasAttribute('data-lock-aspect-ratio')){
             this.#ratio0 = this.#width / this.#height;  //비율 고정
         }else{
@@ -283,8 +289,8 @@ export default class UiColorBarElement extends HTMLElement {
             this.#transformType = 'move'
             this.#left0 = this.#left;
             this.#top0 = this.#top;
-            this.#x0 = event.pageX;
-            this.#y0 = event.pageY;
+            this.#x0 = event.clientX - this.#boundaryRect.left;
+            this.#y0 = event.clientY - this.#boundaryRect.top;
         } else if (target.dataset.rotate) {
             this.#transformType = 'rotate'
             this.#rotation0 = this.#rotation;
@@ -326,8 +332,8 @@ export default class UiColorBarElement extends HTMLElement {
         this.#handleLocal = this.#getHandleLocal(this.#resizeType);
 
         // 시작 포인터 world 좌표 저장 (delta 계산용)
-        this.#startWorldX = event.pageX;
-        this.#startWorldY = event.pageY;
+        this.#startWorldX = event.clientX - this.#boundaryRect.left;
+        this.#startWorldY = event.clientY - this.#boundaryRect.top;
 
         // anchor의 world 좌표 (드래그 중 고정)
         const rad = this.#rotation0 * Math.PI / 180;
@@ -341,16 +347,16 @@ export default class UiColorBarElement extends HTMLElement {
         if (!target.hasPointerCapture(event.pointerId)) return;
 
         if (this.#transformType === 'move') {
-            const x1 = event.pageX;
-            const y1 = event.pageY;
+            const x1 = event.clientX - this.#boundaryRect.left;
+            const y1 = event.clientY - this.#boundaryRect.top;
             const left = this.#left0 + x1 - this.#x0;
             const top = this.#top0 + y1 - this.#y0;
             this.moveTo(left, top);
             this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'move',handle:event.target})
         } else if (this.#transformType === 'rotate') {
-            const x1 = event.pageX;
-            const y1 = event.pageY;
+            const x1 = event.clientX - this.#boundaryRect.left;
+            const y1 = event.clientY - this.#boundaryRect.top;
             const rad = Math.atan2(y1 - this.#y0, x1 - this.#x0);
             const rotation = (rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
             this.rotateTo(rotation);
@@ -410,8 +416,8 @@ export default class UiColorBarElement extends HTMLElement {
     // delta를 local 좌표로 변환
     #deltaToLocal(event) {
         const rad = -this.#rotation0 * Math.PI / 180;
-        const dwx = event.pageX - this.#startWorldX;
-        const dwy = event.pageY - this.#startWorldY;
+        const dwx = event.clientX - this.#boundaryRect.left - this.#startWorldX;
+        const dwy = event.clientY - this.#boundaryRect.top - this.#startWorldY;
         return {
             x: dwx * Math.cos(rad) - dwy * Math.sin(rad),
             y: dwx * Math.sin(rad) + dwy * Math.cos(rad),
@@ -602,8 +608,8 @@ export default class UiColorBarElement extends HTMLElement {
         if(this.#boundary){
             if(refreshBoundaryRect) this.#boundaryRect = this.#boundary.getBoundingClientRect();
             let {left,top,width,height} = this.#boundaryRect;
-            left += window.scrollX;
-            top += window.scrollY;
+            // left += window.scrollX;
+            // top += window.scrollY;
             this.clampToBounds({left,top,width,height});
         }
     }
@@ -615,10 +621,10 @@ export default class UiColorBarElement extends HTMLElement {
         let cy = top + height / 2;
 
         // 2. bounds 안으로 center를 clamp
-        const minX = bounds.left;
-        const maxX = bounds.left + bounds.width;
-        const minY = bounds.top;
-        const maxY = bounds.top + bounds.height;
+        const minX = 0;
+        const maxX = 0 + bounds.width;
+        const minY = 0;
+        const maxY = 0 + bounds.height;
 
         cx = Math.max(minX, Math.min(maxX, cx));
         cy = Math.max(minY, Math.min(maxY, cy));
@@ -671,11 +677,15 @@ export default class UiColorBarElement extends HTMLElement {
                     position: absolute;
                     margin: 0;
                     padding: 0;
-                    left: var(--left,0);
-                    top: var(--top,0);
+                    #left: var(--left,0);
+                    #top: var(--top,0);
+                    #transform: rotate(var(--rotation,0deg));
+                    left:0;
+                    top:0;
+                    transform: translate(var(--left,0),var(--top,0)) rotate(var(--rotation,0deg));
+                    
                     width: var(--width,0);
                     height: var(--height,0);
-                    transform: rotate(var(--rotation,0deg));
                     pointer-events: none;
                     z-index: 3;
                 }
