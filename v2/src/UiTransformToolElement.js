@@ -260,7 +260,14 @@ export default class UiColorBarElement extends HTMLElement {
         const target = event.target; // 최초 이벤트 발생 요소 지정
         target.addEventListener('pointermove', this.handlePointermove);
         target.setPointerCapture(event.pointerId);
+
+        //-- 동작 표시
+        target.classList.add('is-active');
+        if(target.hasAttribute('data-move')) this.dataset.move = target.dataset.move;
+        if(target.hasAttribute('data-resize')) this.dataset.resize = target.dataset.resize;
+        if(target.hasAttribute('data-rotate')) this.dataset.rotate = target.dataset.rotate;
         this.classList.add('is-transforming');
+
 
         if(this.hasAttribute('data-lock-aspect-ratio')){
             this.#ratio0 = this.#width / this.#height;  //비율 고정
@@ -567,6 +574,11 @@ export default class UiColorBarElement extends HTMLElement {
 
         target.removeEventListener('pointermove', this.handlePointermove);
         target.releasePointerCapture(event.pointerId);
+        //-- 동작 표시 제거
+        target.classList.remove('is-active');
+        delete this.dataset.move;
+        delete this.dataset.resize;
+        delete this.dataset.rotate;
         this.classList.remove('is-transforming');
 
         this.clampToBoundary(false);
