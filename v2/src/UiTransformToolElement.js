@@ -251,14 +251,24 @@ export default class UiColorBarElement extends HTMLElement {
         }
     }
 
-    #fixedWorld = null;
+
     #width0;
     #height0;
+    #ratio0 = null
     handlePointerdown = (event) => {
         // const eventElement = event.composedPath()[0]; // 최초 이벤트 발생 요소 지정
         const target = event.target; // 최초 이벤트 발생 요소 지정
         target.addEventListener('pointermove', this.handlePointermove);
         target.setPointerCapture(event.pointerId);
+        this.classList.add('is-transforming');
+
+        if(this.hasAttribute('data-lock-aspect-ratio')){
+            this.#ratio0 = this.#width / this.#height;  //비율 고정
+        }else{
+            this.#ratio0 = null
+        }
+        
+
 
         if (!target) {
             return;
@@ -287,6 +297,7 @@ export default class UiColorBarElement extends HTMLElement {
     #startWorldY = null
     #anchorWorldX = null
     #anchorWorldY = null
+
     #handlePointerdownForResize(event) {
         this.#transformType = 'resize';
         this.#resizeType = event.target.dataset.resize;
@@ -297,6 +308,7 @@ export default class UiColorBarElement extends HTMLElement {
         this.#top0 = this.#top;
         this.#width0 = this.#width;
         this.#height0 = this.#height;
+        
 
         // 회전 기준 center (고정)
         this.#cx0 = this.#left + this.#width / 2;
@@ -334,12 +346,12 @@ export default class UiColorBarElement extends HTMLElement {
             const y1 = event.pageY;
             const rad = Math.atan2(y1 - this.#y0, x1 - this.#x0);
             const rotation = (rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
-
             this.rotateTo(rotation);
             this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'rotate',handle:event.target})
         } else if (this.#transformType === 'resize') {
             this.handlePointermoveForResize(event)           
+            
             this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'resize',handle:event.target})
         }
@@ -351,9 +363,10 @@ export default class UiColorBarElement extends HTMLElement {
     handlePointermoveForResize(event) {
         const origin = this.dataset.resizeOrigin ?? "edge";
         if (origin === "center") {
-            return this.#resizeFromCenter(event);
+            this.#resizeFromCenter(event);           
+        }else{
+            this.#resizeFromEdge(event);
         }
-        return this.#resizeFromEdge(event);
     }
     #getHandleLocal(type) {
         const w = this.#width0;
@@ -409,6 +422,24 @@ export default class UiColorBarElement extends HTMLElement {
         const hw = this.#width0 / 2;
         const hh = this.#height0 / 2;
 
+        // 비율 유지하기
+        if (this.#ratio0 && ['se','sw','ne','nw'].includes(this.#resizeType)) {
+            const ratio = this.#ratio0;
+    
+            const dx = p.x - a.x;
+            const dy = p.y - a.y;
+    
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // 가로 기준 → 세로 맞춤
+                const sign = dy >= 0 ? 1 : -1;
+                p.y = a.y + sign * (Math.abs(dx) / ratio);
+            } else {
+                // 세로 기준 → 가로 맞춤
+                const sign = dx >= 0 ? 1 : -1;
+                p.x = a.x + sign * (Math.abs(dy) * ratio);
+            }
+        }
+
         let left, right, top, bottom;
 
         switch (this.#resizeType) {
@@ -457,6 +488,22 @@ export default class UiColorBarElement extends HTMLElement {
         const d = this.#deltaToLocal(event);
         const h = this.#handleLocal;
         const p = { x: h.x + d.x, y: h.y + d.y };
+        if (this.#ratio0 && ['se','sw','ne','nw'].includes(this.#resizeType)) {
+            const ratio = this.#ratio0;
+
+            const absX = Math.abs(p.x);
+            const absY = Math.abs(p.y);
+
+            if (Math.abs(d.x) > Math.abs(d.y)) {
+                // 가로 기준 → 세로 맞춤
+                const signY = p.y >= 0 ? 1 : -1;
+                p.y = signY * (absX / ratio);
+            } else {
+                // 세로 기준 → 가로 맞춤
+                const signX = p.x >= 0 ? 1 : -1;
+                p.x = signX * (absY * ratio);
+            }
+        }
 
         let left, right, top, bottom;
 
@@ -520,6 +567,7 @@ export default class UiColorBarElement extends HTMLElement {
 
         target.removeEventListener('pointermove', this.handlePointermove);
         target.releasePointerCapture(event.pointerId);
+        this.classList.remove('is-transforming');
 
         this.clampToBoundary(false);
 
@@ -529,6 +577,7 @@ export default class UiColorBarElement extends HTMLElement {
         this.#y0 = null;
         this.#rotation0 = null;
 
+        
         this.dispatchCustomEvent('transform-end',{action:'end',handle:event.target})
     }
 
@@ -571,6 +620,12 @@ export default class UiColorBarElement extends HTMLElement {
         this.top = top;
 
         return this;
+    }
+
+    resizeWithAspectRatio(ratio=this.#ratio0){
+        const width = this.#width;
+        // const height = this.#height;
+        this.height = width / ratio;
     }
 
     /* =========================
@@ -684,6 +739,14 @@ export default class UiColorBarElement extends HTMLElement {
                     background-color: #fff;
                     transform: translate(calc(-50% + 1px), 50%);
                 }
+                :host .slot-wrapper{
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                }
             </style>
             ${this.constructor.appendStyle}
             <div part="wapper" class="wapper">
@@ -705,8 +768,9 @@ export default class UiColorBarElement extends HTMLElement {
                     </div>
                 </div>
 
-
-                <slot></slot>
+                <div class="slot-wrapper">
+                    <slot></slot>
+                </div>
             </div>
         `;
     }

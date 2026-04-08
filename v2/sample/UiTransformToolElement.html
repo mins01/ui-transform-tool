@@ -83,8 +83,17 @@
             
             
             <div class="transform-boundary" style="background-color: #abc9; height: 500px;margin:50px">
-                <ui-transform-tool style="min-width:20px;min-height:20px;" left="50" top="50" width="123" height="214"></ui-transform-tool>
-            </div>        
+                자유 리사이즈
+                <ui-transform-tool style="min-width:20px;min-height:20px;" left="50" top="50" width="123" height="214">edge</ui-transform-tool>
+                <ui-transform-tool style="min-width:20px;min-height:20px;"  data-resize-origin="center" left="150" top="150" width="123" height="214">center</ui-transform-tool>
+            </div>
+            <div class="transform-boundary" style="background-color: #abc9; height: 500px;margin:50px">
+                비율 고정 리사이즈
+                <ui-transform-tool style="min-width:20px;min-height:20px;" data-lock-aspect-ratio left="50" top="50" width="123" height="214">edge</ui-transform-tool>
+                <ui-transform-tool style="min-width:20px;min-height:20px;" data-lock-aspect-ratio  data-resize-origin="center" left="150" top="150" width="123" height="214">center</ui-transform-tool>
+            </div>
+
+            
 
         </div>
     </div>
