@@ -364,7 +364,6 @@ export default class UiColorBarElement extends HTMLElement {
             this.dispatchCustomEvent('transform-update',{action:'rotate',handle:event.target})
         } else if (this.#transformType === 'resize') {
             this.handlePointermoveForResize(event)           
-            
             this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'resize',handle:event.target})
         }
