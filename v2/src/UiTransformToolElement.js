@@ -690,15 +690,13 @@ export default class UiColorBarElement extends HTMLElement {
                 :host::part(border){
                     pointer-events: none;
                     position: absolute;
-                    // border:2px dashed #000;
-                    // inset:calc(-1px / 2);
-                    outline: 2px dashed #000;
+                    outline: var(--border-width,2px) var(--border-style,dashed) var(--border-color,#000);
                     inset:0;
                 }
                 :host::part(handles){
                     pointer-events: all;
                     position: absolute;
-                    inset: 0;
+                    inset: calc(var(--border-width,2px) / 2 * -1);
                 }
                 :host .resize-handle{
                     z-index: 3;
@@ -731,9 +729,9 @@ export default class UiColorBarElement extends HTMLElement {
                     left: 50%;
                     top: 100%;
                     transform: translate(-50%, 0%);
-                    bottom: -30px;
+                    bottom: calc(var(--handle-size,12px) * -2);
                     width: 0px;
-                    border-right: 2px dashed #000;
+                    border-right: var(--border-width,2px) var(--border-style,dashed) var(--border-color,#000);
                     box-sizing: content-box;
                 }
                 :host .rotate-handle{
@@ -749,7 +747,7 @@ export default class UiColorBarElement extends HTMLElement {
                     contain: strict;
                     overflow: hidden;
                     background-color: #fff;
-                    transform: translate(calc(-50% + 1px), 50%);
+                    transform: translate(calc(-50% + var(--border-width,2px) / 2), 50%);
                 }
                 :host .slot-wrapper{
                     position: absolute;

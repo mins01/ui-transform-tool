@@ -56,8 +56,8 @@
     
 </head>
 
-<body>
-    <div class="container py-3" id="container0">
+<body >
+    <div class="container py-3" id="container0" >
         <h1>Sample - UiTransformToolElement</h1>
         <hr>
         <div>
@@ -82,10 +82,10 @@
             <div class="transform-tool-target position-absolute rounded  box-shadow text-bg-info" style="--width:80px;--height:80px;--left:100px;--top:200px;" data-transform-tool-no-sync onclick="tft01.setTarget(this);">data-transform-tool-no-sync target 연결민하고 싱크 동작 안한다. event 에서 따로 처리.</div>
             
             
-            <div class="transform-boundary" style="background-color: #abc9; height: 500px;margin:50px">
+            <div class="transform-boundary" style="background-color: #abc9; height: 500px;">
                 자유 리사이즈
                 <ui-transform-tool style="min-width:20px;min-height:20px;" left="50" top="50" width="123" height="214">edge</ui-transform-tool>
-                <ui-transform-tool style="min-width:20px;min-height:20px;"  data-resize-origin="center" left="150" top="150" width="123" height="214">center</ui-transform-tool>
+                <ui-transform-tool style="min-width:20px;min-height:20px;--handle-size:24px; --border-width:12px;--border-color:#f009;--border-style:dotted;"  data-resize-origin="center" left="150" top="150" width="123" height="214">center</ui-transform-tool>
             </div>
             <div class="transform-boundary" style="background-color: #abc9; height: 500px;margin:50px">
                 비율 고정 리사이즈
@@ -119,7 +119,13 @@
             if(!e.target.matches('.transform-tool-target, ui-transform-tool')){ tft01.setTarget(null); return false; } 
         });
 
-        // 이벤트 수동 처리. 동작 종료 후 적용한다.
+        // 수동 처리.
+        tft01.addEventListener('transform-target-change', (e) => {  
+            if(e.detail.target && e.detail.target.hasAttribute('data-transform-tool-no-sync')){
+                tft01.syncFrom(e.detail.target);
+                return; 
+            }
+        });        
         tft01.addEventListener('transform-end', (e) => {  
             if(e.detail.target && e.detail.target.hasAttribute('data-transform-tool-no-sync')){
                 tft01.syncTo(e.detail.target);
