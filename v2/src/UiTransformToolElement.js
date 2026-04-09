@@ -705,13 +705,10 @@ export default class UiColorBarElement extends HTMLElement {
                     position: absolute;
                     outline: var(--border-width,2px) var(--border-style,dashed) var(--border-color,#000);
                     inset:0;
-
-
                 }
                 :host .handles-wrapper{
                     pointer-events: none;
                     position: absolute;
-                    inset: 0;
 
                     left: 50%;
                     top: 50%;
@@ -722,7 +719,7 @@ export default class UiColorBarElement extends HTMLElement {
                 :host::part(handles){
                     pointer-events: all;
                     position: absolute;
-                    inset: calc(var(--border-width,2px) / 2 * -1);                  
+                    inset: calc(var(--border-width,2px) / 2 * -1);
                 }
                 :host .resize-handle{
                     z-index: 3;
