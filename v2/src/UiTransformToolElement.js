@@ -593,6 +593,7 @@ export default class UiColorBarElement extends HTMLElement {
         this.#x0 = null;
         this.#y0 = null;
         this.#rotation0 = null;
+        this.#boundaryRect = null
 
         
         this.dispatchCustomEvent('transform-end',{action:'end',handle:event.target})
@@ -604,26 +605,23 @@ export default class UiColorBarElement extends HTMLElement {
 
     #boundaryRect = null
     clampToBoundary(refreshBoundaryRect = true){
-        if(this.#boundary){
+        if(this.hasAttribute('data-clamp-boundary') && this.#boundary){
             if(refreshBoundaryRect) this.#boundaryRect = this.#boundary.getBoundingClientRect();
-            let {left,top,width,height} = this.#boundaryRect;
-            // left += window.scrollX;
-            // top += window.scrollY;
-            this.clampToBounds({left,top,width,height});
+            this.clampToRect(this.#boundaryRect);
         }
     }
-    clampToBounds(bounds){
+    clampToRect(boundaryRect){
         let { left, top, width, height } = this;
 
         // 1. 현재 중심점
         let cx = left + width / 2;
         let cy = top + height / 2;
 
-        // 2. bounds 안으로 center를 clamp
+        // 2. boundaryRect 안으로 center를 clamp
         const minX = 0;
-        const maxX = 0 + bounds.width;
+        const maxX = 0 + boundaryRect.width;
         const minY = 0;
-        const maxY = 0 + bounds.height;
+        const maxY = 0 + boundaryRect.height;
 
         cx = Math.max(minX, Math.min(maxX, cx));
         cy = Math.max(minY, Math.min(maxY, cy));
@@ -639,11 +637,17 @@ export default class UiColorBarElement extends HTMLElement {
         return this;
     }
 
-    resizeWithAspectRatio(ratio=this.#ratio0){
-        const width = this.#width;
-        // const height = this.#height;
-        this.height = width / ratio;
+    toJSON() { return { left: this.left, top: this.top, width: this.width, height: this.height, rotation: this.rotation }; }
+    getLocalRect() {  return new DOMRect( this.left, this.top, this.width, this.height) }
+    getViewportRect() { 
+        const boundaryRect = this.#boundaryRect??this.#boundary.getBoundingClientRect();
+        return new DOMRect( this.left + boundaryRect.left, this.top + boundaryRect.top, this.width, this.height)
     }
+    getPageRect() { 
+        const boundaryRect = this.#boundaryRect??this.#boundary.getBoundingClientRect();
+        return new DOMRect( this.left + boundaryRect.left +  window.scrollX, this.top + boundaryRect.top + window.scrollY, this.width, this.height)
+    }
+
 
     /* =========================
      * primitive / serialization
@@ -671,8 +675,6 @@ export default class UiColorBarElement extends HTMLElement {
                     user-select: none;
                     touch-action: none;
                     display: block;
-                    min-width: 10px;
-                    min-height: 10px;
                     position: absolute;
                     margin: 0;
                     padding: 0;
@@ -695,17 +697,32 @@ export default class UiColorBarElement extends HTMLElement {
                     pointer-events: none;
                     position: absolute;
                     inset: 0;
+
+
                 }
                 :host::part(border){
                     pointer-events: none;
                     position: absolute;
                     outline: var(--border-width,2px) var(--border-style,dashed) var(--border-color,#000);
                     inset:0;
+
+
+                }
+                :host .handles-wrapper{
+                    pointer-events: none;
+                    position: absolute;
+                    inset: 0;
+
+                    left: 50%;
+                    top: 50%;
+                    width: max(100%, calc(var(--handle-size,12px) * 3));
+                    height: max(100%, calc(var(--handle-size,12px) * 3));
+                    transform: translate(-50%, -50%);                    
                 }
                 :host::part(handles){
                     pointer-events: all;
                     position: absolute;
-                    inset: calc(var(--border-width,2px) / 2 * -1);
+                    inset: calc(var(--border-width,2px) / 2 * -1);                  
                 }
                 :host .resize-handle{
                     z-index: 3;
@@ -770,20 +787,22 @@ export default class UiColorBarElement extends HTMLElement {
             ${this.constructor.appendStyle}
             <div part="wapper" class="wapper">
                 <div part="border"></div>
-                <div part="handles" data-move="move">
-                    <div part="resize-handle resize-handle-c" class="resize-handle resize-handle-c" data-resize="c" data-move="move"></div>
+                <div class="handles-wrapper">
+                    <div part="handles" data-move="move">
+                        <div part="resize-handle resize-handle-c" class="resize-handle resize-handle-c" data-resize="c" data-move="move"></div>
 
-                    <div part="resize-handle resize-handle-nw" class="resize-handle resize-handle-nw" data-resize="nw"></div>
-                    <div part="resize-handle resize-handle-n" class="resize-handle resize-handle-n" data-resize="n"></div>
-                    <div part="resize-handle resize-handle-ne" class="resize-handle resize-handle-ne" data-resize="ne"></div>
-                    <div part="resize-handle resize-handle-w" class="resize-handle resize-handle-w" data-resize="w"></div>
+                        <div part="resize-handle resize-handle-nw" class="resize-handle resize-handle-nw" data-resize="nw"></div>
+                        <div part="resize-handle resize-handle-n" class="resize-handle resize-handle-n" data-resize="n"></div>
+                        <div part="resize-handle resize-handle-ne" class="resize-handle resize-handle-ne" data-resize="ne"></div>
+                        <div part="resize-handle resize-handle-w" class="resize-handle resize-handle-w" data-resize="w"></div>
 
-                    <div part="resize-handle resize-handle-e" class="resize-handle resize-handle-e" data-resize="e"></div>
-                    <div part="resize-handle resize-handle-sw" class="resize-handle resize-handle-sw" data-resize="sw"></div>
-                    <div part="resize-handle resize-handle-s" class="resize-handle resize-handle-s" data-resize="s"></div>
-                    <div part="resize-handle resize-handle-se" class="resize-handle resize-handle-se" data-resize="se"></div>
-                    <div part="rotate-handle-wrap" class="rotate-handle-wrap">
-                        <div part="rotate-handle" class="rotate-handle" data-rotate="rotate"></div>
+                        <div part="resize-handle resize-handle-e" class="resize-handle resize-handle-e" data-resize="e"></div>
+                        <div part="resize-handle resize-handle-sw" class="resize-handle resize-handle-sw" data-resize="sw"></div>
+                        <div part="resize-handle resize-handle-s" class="resize-handle resize-handle-s" data-resize="s"></div>
+                        <div part="resize-handle resize-handle-se" class="resize-handle resize-handle-se" data-resize="se"></div>
+                        <div part="rotate-handle-wrap" class="rotate-handle-wrap">
+                            <div part="rotate-handle" class="rotate-handle" data-rotate="rotate"></div>
+                        </div>
                     </div>
                 </div>
 
