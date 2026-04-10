@@ -54,6 +54,9 @@ export default class UiColorBarElement extends HTMLElement {
 
     #boundary = null;
 
+    scaleX = 1;
+    scaleY = 1;
+
     /* =========================
      * getter / setter
      * ========================= */
@@ -223,6 +226,8 @@ export default class UiColorBarElement extends HTMLElement {
         target.style.setProperty('--width', this.#width + 'px');
         target.style.setProperty('--height', this.#height + 'px');
         target.style.setProperty('--rotation', this.#rotation + 'deg');
+        target.style.setProperty('--scale-x', this.scaleX);
+        target.style.setProperty('--scale-y', this.scaleY);
         // this.style.setProperty('--zoom', this.zoom);
     }
 
@@ -270,7 +275,6 @@ export default class UiColorBarElement extends HTMLElement {
         if(target.hasAttribute('data-rotate')) this.dataset.rotate = target.dataset.rotate;
         this.classList.add('is-transforming');
 
-
         // 바운드리 rect
         this.#boundaryRect = this.#boundary.getBoundingClientRect();
 
@@ -281,6 +285,9 @@ export default class UiColorBarElement extends HTMLElement {
             this.#ratio0 = null
         }
         
+        // 배율 변수 초기화
+        this.scaleX = 1;
+        this.scaleY = 1;
 
 
         if (!target) {
@@ -428,8 +435,17 @@ export default class UiColorBarElement extends HTMLElement {
         // delta 기반: 핸들 초기 위치 + 포인터 이동량(local)
         const d = this.#deltaToLocal(event);
         const h = this.#handleLocal;
+        
         const p = { x: h.x + d.x, y: h.y + d.y };
         const a = this.#anchorLocal;
+
+        // // 뒤집힘 계산
+        const dx0 = h.x - a.x;
+        const dy0 = h.y - a.y;
+        const dx  = p.x - a.x;
+        const dy  = p.y - a.y;
+        this.scaleX = dx * dx0 < 0 ? -1 : 1;
+        this.scaleY = dy * dy0 < 0 ? -1 : 1;
 
         const hw = this.#width0 / 2;
         const hh = this.#height0 / 2;
@@ -452,6 +468,8 @@ export default class UiColorBarElement extends HTMLElement {
             }
         }
 
+
+        
         let left, right, top, bottom;
 
         switch (this.#resizeType) {
@@ -500,6 +518,12 @@ export default class UiColorBarElement extends HTMLElement {
         const d = this.#deltaToLocal(event);
         const h = this.#handleLocal;
         const p = { x: h.x + d.x, y: h.y + d.y };
+        
+        // 뒤집힘 계산
+        this.scaleX = p.x * h.x < 0 ? -1 : 1;
+        this.scaleY = p.y * h.y < 0 ? -1 : 1;
+
+
         if (this.#ratio0 && ['se','sw','ne','nw'].includes(this.#resizeType)) {
             const ratio = this.#ratio0;
 
@@ -588,15 +612,18 @@ export default class UiColorBarElement extends HTMLElement {
 
         this.clampToBoundary(false);
 
+        this.dispatchCustomEvent('transform-end',{action:'end',handle:event.target})
+
         this.#left0 = null;
         this.#top0 = null;
         this.#x0 = null;
         this.#y0 = null;
         this.#rotation0 = null;
         this.#boundaryRect = null
-
+        this.scaleX = 1;
+        this.scaleY = 1;
+        this.applyStyle();
         
-        this.dispatchCustomEvent('transform-end',{action:'end',handle:event.target})
     }
 
     handlePointercancel = (event) => {
@@ -637,7 +664,7 @@ export default class UiColorBarElement extends HTMLElement {
         return this;
     }
 
-    toJSON() { return { left: this.left, top: this.top, width: this.width, height: this.height, rotation: this.rotation }; }
+    toJSON() { return { left: this.left, top: this.top, width: this.width, height: this.height, rotation: this.rotation, scaleX: this.scaleX, scaleY: this.scaleY }; }
     getLocalRect() {  return new DOMRect( this.left, this.top, this.width, this.height) }
     getViewportRect() { 
         const boundaryRect = this.#boundaryRect??this.#boundary.getBoundingClientRect();
@@ -683,7 +710,7 @@ export default class UiColorBarElement extends HTMLElement {
                     #transform: rotate(var(--rotation,0deg));
                     left:0;
                     top:0;
-                    transform: translate(var(--left,0),var(--top,0)) rotate(var(--rotation,0deg));
+                    transform: translate(var(--left,0),var(--top,0)) rotate(var(--rotation,0deg)) scale(var(--scale-x,1),var(--scale-y,1));
                     
                     width: var(--width,0);
                     height: var(--height,0);
@@ -735,7 +762,9 @@ export default class UiColorBarElement extends HTMLElement {
                     background-color: #fff;
                     transform: translate(-50%, -50%);
                 }
-
+                :host .resize-handle.is-active{
+                    filter:invert(1);
+                }
                 :host .resize-handle[data-resize='nw']{ left:0;     top:0;   }
                 :host .resize-handle[data-resize='n'] { left:50%;   top:0;   }
                 :host .resize-handle[data-resize='ne']{ left:100%;  top:0;   }
@@ -771,6 +800,9 @@ export default class UiColorBarElement extends HTMLElement {
                     overflow: hidden;
                     background-color: #fff;
                     transform: translate(calc(-50% + var(--border-width,2px) / 2), 50%);
+                }
+                :host .rotate-handle.is-active{
+                    filter:invert(1);
                 }
                 :host .slot-wrapper{
                     position: absolute;
