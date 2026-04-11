@@ -157,12 +157,12 @@ export default class UiColorBarElement extends HTMLElement {
         if(target){
             this.classList.add('has-target');
             if(this.transformToolSync && !target.hasAttribute('data-transform-tool-no-sync')){
-                this.syncFrom(target)       
+                this.syncFrom(target);               
+                this.clampToBoundary();
                 this.applyStyle(target);
             }
             this.addEventListener('transform-update', this.handleTargetSync);
         }
-        this.target = target
         this.dispatchCustomEvent('transform-target-change')
     }
     dispatchCustomEvent(type, optDetail={}) {
@@ -206,8 +206,8 @@ export default class UiColorBarElement extends HTMLElement {
         const style = window.getComputedStyle(target);
         const position = style.getPropertyValue('position');
         if(position==='static') return { 
-            left: target.offsetLeft,
-            top: target.offsetTop,
+            left: target.offsetLeft + window.scrollX,
+            top: target.offsetTop + window.scrollY,
             width: parseFloat( style.getPropertyValue('--width')!=='' ? style.getPropertyValue('--width') : style.getPropertyValue('width') ),
             height: parseFloat( style.getPropertyValue('--height')!=='' ? style.getPropertyValue('--height') : style.getPropertyValue('height') ),
             rotation: parseFloat( style.getPropertyValue('--rotation')!=='' ? style.getPropertyValue('--rotation') : 0 ),
@@ -263,6 +263,7 @@ export default class UiColorBarElement extends HTMLElement {
     #ratio0 = null
     
     handlePointerdown = (event) => {
+        event.stopPropagation();
         // const eventElement = event.composedPath()[0]; // 최초 이벤트 발생 요소 지정
         const target = event.target; // 최초 이벤트 발생 요소 지정
         target.addEventListener('pointermove', this.handlePointermove);
@@ -270,7 +271,10 @@ export default class UiColorBarElement extends HTMLElement {
 
         //-- 동작 표시
         target.classList.add('is-active');
-        if(target.hasAttribute('data-move')) this.dataset.move = target.dataset.move;
+        if(target.hasAttribute('data-move')){
+            this.dataset.move = target.dataset.move;
+
+        }
         if(target.hasAttribute('data-resize')) this.dataset.resize = target.dataset.resize;
         if(target.hasAttribute('data-rotate')) this.dataset.rotate = target.dataset.rotate;
         this.classList.add('is-transforming');
@@ -720,18 +724,20 @@ export default class UiColorBarElement extends HTMLElement {
                 :host(.show-when-has-target:not(.has-target)){
                     display: none;
                 }
-                :host::part(wapper){
+                :host .wapper{
                     pointer-events: none;
                     position: absolute;
                     inset: 0;
-
-
                 }
-                :host::part(border){
+                :host .border{
                     pointer-events: none;
                     position: absolute;
                     outline: var(--border-width,2px) var(--border-style,dashed) var(--border-color,#000);
                     inset:0;
+                }
+                :host([data-no-border]) .border{
+                    pointer-events: none;
+                    display: none;
                 }
                 :host .handles-wrapper{
                     pointer-events: none;
@@ -743,10 +749,13 @@ export default class UiColorBarElement extends HTMLElement {
                     height: max(100%, calc(var(--handle-size,12px) * 3));
                     transform: translate(-50%, -50%);                    
                 }
-                :host::part(handles){
+                :host .handles{
                     pointer-events: all;
                     position: absolute;
                     inset: calc(var(--border-width,2px) / 2 * -1);
+                }
+                :host([data-no-move]) .move-handle{
+                    pointer-events: none;
                 }
                 :host .resize-handle{
                     z-index: 3;
@@ -762,9 +771,14 @@ export default class UiColorBarElement extends HTMLElement {
                     background-color: #fff;
                     transform: translate(-50%, -50%);
                 }
+                :host([data-no-resize]) .resize-handle{
+                    pointer-events: none;
+                    display: none;
+                }
                 :host .resize-handle.is-active{
                     filter:invert(1);
                 }
+
                 :host .resize-handle[data-resize='nw']{ left:0;     top:0;   }
                 :host .resize-handle[data-resize='n'] { left:50%;   top:0;   }
                 :host .resize-handle[data-resize='ne']{ left:100%;  top:0;   }
@@ -804,6 +818,10 @@ export default class UiColorBarElement extends HTMLElement {
                 :host .rotate-handle.is-active{
                     filter:invert(1);
                 }
+                :host([data-no-rotate]) :where(.rotate-handle-wrap, .rotate-handle){
+                    pointer-events: none;
+                    display: none;
+                }
                 :host .slot-wrapper{
                     position: absolute;
                     inset: 0;
@@ -815,9 +833,9 @@ export default class UiColorBarElement extends HTMLElement {
             </style>
             ${this.constructor.appendStyle}
             <div part="wapper" class="wapper">
-                <div part="border"></div>
+                <div part="border" class="border"></div>
                 <div class="handles-wrapper">
-                    <div part="handles" data-move="move">
+                    <div part="handles" class="move-handle handles" data-move="move">
                         <div part="resize-handle resize-handle-c" class="resize-handle resize-handle-c" data-resize="c" data-move="move"></div>
 
                         <div part="resize-handle resize-handle-nw" class="resize-handle resize-handle-nw" data-resize="nw"></div>

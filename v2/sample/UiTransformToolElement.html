@@ -107,21 +107,68 @@
                 </ui-transform-tool>
             </div>
         </div>
+        <hr>
+        <div class="p-3">
+            <h3>Broundary 가 변경되는 모양에서의 transform-tool 샘플</h3>
+            <div class="position-relative" class="transform-boundary">
+                <div class="rounded boarder border-1 bg-info flex-fill position-absolute transform-tool-target" id="tft31-box-01" style="--left:0px;--top:0px;--width:300px;--height:300px;" onclick="tft31Broundary.setTarget(this);">
+                    클릭으로 위치시킴
+                </div>
+                <div class="rounded boarder border-1 bg-warning flex-fill position-absolute transform-tool-target" style="--left:0px;--top:300px;--width:300px;--height:300px;" onclick="tft31Broundary.setTarget(this);">
+                    클릭으로 위치시킴
+                </div>
+                <div class="rounded boarder border-1 bg-danger flex-fill position-absolute transform-tool-target" style="--left:300px;--top:0px;--width:500px;--height:600px;" onclick="tft31Broundary.setTarget(this);">
+                    클릭으로 위치시킴
+                </div>
+    
+                <ui-transform-tool id="tft31Broundary" class="transform-boundary" data-no-move data-no-resize data-no-rotate data-no-border style="background-color: #c0c9;" left="100" top="300" width="123" height="214">
+                    <ui-transform-tool id="tft31" left="50" top="50" width="100" height="100" data-clamp-boundary data-lock-aspect-ratio>
+                        내부
+                    </ui-transform-tool>    
+                </ui-transform-tool>
+                <script>
+                    window.tft31Broundary = document.getElementById("tft31Broundary");
+                    window.tft31 = document.getElementById("tft31");
+                    window.addEventListener('load',(event)=>{
+                        tft31Broundary.setTarget(document.querySelector('#tft31-box-01'));
+    
+                    })
+                    tft31Broundary.addEventListener('transform-target-change', (e) => {
+                        tft31.clampToBoundary();
+                    })
+                    
+                </script>
+    
+    
+            </div>
+        </div>
     </div>
     
-        
-    
-
     <ui-transform-tool id="tft01" class="show-when-has-target" left="100" top="300" width="123" height="214"></ui-transform-tool>
-
     <script>
         let syncTarget = null
         const tft01 = document.getElementById("tft01");
-        const tft11 = document.getElementById("tft11");
-        const tft12 = document.getElementById("tft12");
-        const tft21 = document.getElementById("tft21");
-        const tft22 = document.getElementById("tft22");
- 
+        // 수동 처리.
+        tft01.addEventListener('transform-target-change', (e) => {  
+            if(e.detail.target && e.detail.target.hasAttribute('data-transform-tool-no-sync')){
+                tft01.syncFrom(e.detail.target);
+                return; 
+            }
+        });        
+        tft01.addEventListener('transform-end', (e) => {  
+            if(e.detail.target && e.detail.target.hasAttribute('data-transform-tool-no-sync')){
+                tft01.syncTo(e.detail.target);
+                return; 
+            }
+        });
+        
+    </script>
+
+
+
+
+
+    <script>
         const fn1 = (e) => { const target = e.target
             console.log(
                 e.type,
@@ -139,21 +186,6 @@
         window.addEventListener('click', (e) => {
             if(!e.target.matches('.transform-tool-target, ui-transform-tool')){ tft01.setTarget(null); return false; } 
         });
-
-        // 수동 처리.
-        tft01.addEventListener('transform-target-change', (e) => {  
-            if(e.detail.target && e.detail.target.hasAttribute('data-transform-tool-no-sync')){
-                tft01.syncFrom(e.detail.target);
-                return; 
-            }
-        });        
-        tft01.addEventListener('transform-end', (e) => {  
-            if(e.detail.target && e.detail.target.hasAttribute('data-transform-tool-no-sync')){
-                tft01.syncTo(e.detail.target);
-                return; 
-            }
-        });
-        
     </script>
 </body>
 </html>
