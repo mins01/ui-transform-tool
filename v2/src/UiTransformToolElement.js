@@ -92,7 +92,7 @@ export default class UiColorBarElement extends HTMLElement {
             }
         }
         this.applyStyle();
-        this.#boundary = this.closest('.transform-boundary')??document.body;
+        this.#boundary = this.parentElement.closest('.transform-boundary')??document.body;
         
         this.clampToBoundary();
         const wapper = this.shadowRoot.querySelector('.wapper') //this가 아니라 내부 요소로 해야 event.target이 내부 요소로 나온다.
@@ -249,6 +249,7 @@ export default class UiColorBarElement extends HTMLElement {
      * pointer events
      * ========================= */
     handleDblclick = (event) => {
+        event.stopPropagation();
         const target = event.target; // 최초 이벤트 발생 요소 지정
         if (target.dataset.rotate) {
             this.rotateTo(0);
@@ -271,10 +272,7 @@ export default class UiColorBarElement extends HTMLElement {
 
         //-- 동작 표시
         target.classList.add('is-active');
-        if(target.hasAttribute('data-move')){
-            this.dataset.move = target.dataset.move;
-
-        }
+        if(target.hasAttribute('data-move')) this.dataset.move = target.dataset.move; 
         if(target.hasAttribute('data-resize')) this.dataset.resize = target.dataset.resize;
         if(target.hasAttribute('data-rotate')) this.dataset.rotate = target.dataset.rotate;
         this.classList.add('is-transforming');
@@ -354,6 +352,7 @@ export default class UiColorBarElement extends HTMLElement {
     }
 
     handlePointermove = (event) => {
+        event.stopPropagation();
         const target = event.target; // 최초 이벤트 발생 요소 지정
         if (!target.hasPointerCapture(event.pointerId)) return;
 
@@ -444,12 +443,14 @@ export default class UiColorBarElement extends HTMLElement {
         const a = this.#anchorLocal;
 
         // // 뒤집힘 계산
-        const dx0 = h.x - a.x;
-        const dy0 = h.y - a.y;
-        const dx  = p.x - a.x;
-        const dy  = p.y - a.y;
-        this.scaleX = dx * dx0 < 0 ? -1 : 1;
-        this.scaleY = dy * dy0 < 0 ? -1 : 1;
+        if(!this.hasAttribute('data-no-flip')){
+            const dx0 = h.x - a.x;
+            const dy0 = h.y - a.y;
+            const dx  = p.x - a.x;
+            const dy  = p.y - a.y;
+            this.scaleX = dx * dx0 < 0 ? -1 : 1;
+            this.scaleY = dy * dy0 < 0 ? -1 : 1;
+        }
 
         const hw = this.#width0 / 2;
         const hh = this.#height0 / 2;
@@ -524,8 +525,10 @@ export default class UiColorBarElement extends HTMLElement {
         const p = { x: h.x + d.x, y: h.y + d.y };
         
         // 뒤집힘 계산
-        this.scaleX = p.x * h.x < 0 ? -1 : 1;
-        this.scaleY = p.y * h.y < 0 ? -1 : 1;
+        if(!this.hasAttribute('data-no-flip')){
+            this.scaleX = p.x * h.x < 0 ? -1 : 1;
+            this.scaleY = p.y * h.y < 0 ? -1 : 1;
+        }
 
 
         if (this.#ratio0 && ['se','sw','ne','nw'].includes(this.#resizeType)) {
@@ -603,6 +606,7 @@ export default class UiColorBarElement extends HTMLElement {
     }
 
     handlePointerup = (event) => {
+        event.stopPropagation();
         const target = event.target; // 최초 이벤트 발생 요소 지정
 
         target.removeEventListener('pointermove', this.handlePointermove);
