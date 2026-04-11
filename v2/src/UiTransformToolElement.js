@@ -206,8 +206,8 @@ export default class UiColorBarElement extends HTMLElement {
         const style = window.getComputedStyle(target);
         const position = style.getPropertyValue('position');
         if(position==='static') return { 
-            left: target.offsetLeft + window.scrollX,
-            top: target.offsetTop + window.scrollY,
+            left: target.offsetLeft,
+            top: target.offsetTop,
             width: parseFloat( style.getPropertyValue('--width')!=='' ? style.getPropertyValue('--width') : style.getPropertyValue('width') ),
             height: parseFloat( style.getPropertyValue('--height')!=='' ? style.getPropertyValue('--height') : style.getPropertyValue('height') ),
             rotation: parseFloat( style.getPropertyValue('--rotation')!=='' ? style.getPropertyValue('--rotation') : 0 ),
