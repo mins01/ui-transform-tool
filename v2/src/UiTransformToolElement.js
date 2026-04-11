@@ -25,10 +25,10 @@ export default class UiColorBarElement extends HTMLElement {
     }
 
     /** 커스텀 엘리먼트 등록 */
-    static defineCustomElement(tagName = this.tagName) {
+    static register(tagName = this.tagName) {
         if (!customElements.get(tagName)) {
             customElements.define(tagName, this);
-            console.log('defineCustomElement', tagName);
+            console.log('register', tagName);
         }
     }
 
