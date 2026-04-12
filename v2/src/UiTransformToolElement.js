@@ -766,7 +766,7 @@ export default class UiColorBarElement extends HTMLElement {
                     top: 50%;
                     width: max(100%, var(--controls-min-size, 80px));
                     height: max(100%, var(--controls-min-size, 80px));
-                    transform: translate(-50%, -50%);                    
+                    transform: translate(-50%, -50%);
                 }
                 :host .resize-handles{
                     pointer-events: none;
@@ -775,6 +775,14 @@ export default class UiColorBarElement extends HTMLElement {
                 }
                 :host .move-handle{
                     pointer-events: all;
+                    position: absolute;
+                    inset:0;
+                    width: max(100%,calc(var(--width) *  var(--zoom,1) ));
+                    height: max(100%,calc(var(--height) *  var(--zoom,1) ));
+                    z-index: 1;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
                 }
                 :host([data-no-move]) .move-handle{
                     pointer-events: none;
@@ -858,8 +866,10 @@ export default class UiColorBarElement extends HTMLElement {
             ${this.constructor.appendStyle}
             <div part="wapper" class="wapper">                
                 <div part="border" class="border"></div>
+                <div part="content-border" class="content-border"></div>
+
                 <div class="controls">
-                    <div part="content-border move-handle" class="content-border move-handle" data-move="move"></div>
+                    <div part="move-handle-area move-handle" class="move-handle-area move-handle" data-move="move"></div>
                     <div part="resize-handles" class="resize-handles" >
                         <div part="resize-handle resize-handle-c move-handle" class="resize-handle resize-handle-c move-handle" data-resize="c" data-move="move"></div>
 
