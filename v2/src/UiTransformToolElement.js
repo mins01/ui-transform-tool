@@ -236,7 +236,7 @@ export default class UiColorBarElement extends HTMLElement {
         target.style.setProperty('--scale-x', this.scaleX);
         target.style.setProperty('--scale-y', this.scaleY);
         target.style.setProperty('--zoom', this.zoom);
-        target.classList.toggle('is-zoom-1', this.zoom === 1);
+        target.classList.toggle('is-zoomed', this.zoom !== 1);
     }
 
     rotatePoint(x, y, cx, cy, angle) {
@@ -721,9 +721,6 @@ export default class UiColorBarElement extends HTMLElement {
                     position: absolute;
                     margin: 0;
                     padding: 0;
-                    #left: var(--left,0);
-                    #top: var(--top,0);
-                    #transform: rotate(var(--rotation,0deg));
                     left:0;
                     top:0;
                     width: var(--width,0);
@@ -739,7 +736,7 @@ export default class UiColorBarElement extends HTMLElement {
                     position: absolute;
                     inset:0;
                 }
-                :host .bbox{
+                :host .content-border{
                     position: absolute;
                     inset:0;
                     width: calc(var(--width) *  var(--zoom,1) );
@@ -749,39 +746,29 @@ export default class UiColorBarElement extends HTMLElement {
                     top: 50%;
                     transform: translate(-50%, -50%);
                 }
-                :host .bbox-border{
-                    outline: var(--border-width,2px) var(--border-style,dashed) #f009;
-                }
-                :host(.is-zoom-1) .bbox-border{
-                    outline-width: 0px;
-                }
-                :host .ui-layer{
-                    position: absolute;
-                    inset:0;
-                    pointer-events: none;
-                    z-index: 2;
+                :host(.is-zoomed) .content-border{
+                    outline: var(--content-border-width, 1px) var(--content-border-style, dashed) var(--content-border-color, #f009);
                 }
                 :host .border{
                     pointer-events: none;
                     position: absolute;
-                    outline: var(--border-width,2px) var(--border-style,dashed) var(--border-color,#000);
+                    outline: var(--border-width, 2px) var(--border-style, dashed) var(--border-color, #000);
                     inset:0;
                 }
                 :host([data-no-border]) .border{
                     pointer-events: none;
                     display: none;
                 }
-                :host .handles-wrapper{
+                :host .controls{
                     pointer-events: none;
                     position: absolute;
-
                     left: 50%;
                     top: 50%;
-                    width: max(100%, calc(var(--handle-size,12px) * 3));
-                    height: max(100%, calc(var(--handle-size,12px) * 3));
+                    width: max(100%, var(--controls-min-size, 80px));
+                    height: max(100%, var(--controls-min-size, 80px));
                     transform: translate(-50%, -50%);                    
                 }
-                :host .handles{
+                :host .resize-handles{
                     pointer-events: none;
                     position: absolute;
                     inset: calc(var(--border-width,2px) / 2 * -1);
@@ -870,30 +857,27 @@ export default class UiColorBarElement extends HTMLElement {
             </style>
             ${this.constructor.appendStyle}
             <div part="wapper" class="wapper">                
-                <div class="ui-layer">
-                    
-                    <div part="border" class="border"></div>
-                    <div class="handles-wrapper">
-                        <div part="handles"  class="handles" >
-                            <div class="bbox bbox-border move-handle" data-move="move"></div>
-                            <div part="resize-handle resize-handle-c" class="resize-handle resize-handle-c" data-resize="c" data-move="move"></div>
+                <div part="border" class="border"></div>
+                <div class="controls">
+                    <div part="content-border move-handle" class="content-border move-handle" data-move="move"></div>
+                    <div part="resize-handles" class="resize-handles" >
+                        <div part="resize-handle resize-handle-c move-handle" class="resize-handle resize-handle-c move-handle" data-resize="c" data-move="move"></div>
 
-                            <div part="resize-handle resize-handle-nw" class="resize-handle resize-handle-nw" data-resize="nw"></div>
-                            <div part="resize-handle resize-handle-n" class="resize-handle resize-handle-n" data-resize="n"></div>
-                            <div part="resize-handle resize-handle-ne" class="resize-handle resize-handle-ne" data-resize="ne"></div>
-                            <div part="resize-handle resize-handle-w" class="resize-handle resize-handle-w" data-resize="w"></div>
+                        <div part="resize-handle resize-handle-nw" class="resize-handle resize-handle-nw" data-resize="nw"></div>
+                        <div part="resize-handle resize-handle-n" class="resize-handle resize-handle-n" data-resize="n"></div>
+                        <div part="resize-handle resize-handle-ne" class="resize-handle resize-handle-ne" data-resize="ne"></div>
+                        <div part="resize-handle resize-handle-w" class="resize-handle resize-handle-w" data-resize="w"></div>
 
-                            <div part="resize-handle resize-handle-e" class="resize-handle resize-handle-e" data-resize="e"></div>
-                            <div part="resize-handle resize-handle-sw" class="resize-handle resize-handle-sw" data-resize="sw"></div>
-                            <div part="resize-handle resize-handle-s" class="resize-handle resize-handle-s" data-resize="s"></div>
-                            <div part="resize-handle resize-handle-se" class="resize-handle resize-handle-se" data-resize="se"></div>
-                            <div part="rotate-handle-wrap" class="rotate-handle-wrap">
-                                <div part="rotate-handle" class="rotate-handle" data-rotate="rotate"></div>
-                            </div>
-                        </div>
+                        <div part="resize-handle resize-handle-e" class="resize-handle resize-handle-e" data-resize="e"></div>
+                        <div part="resize-handle resize-handle-sw" class="resize-handle resize-handle-sw" data-resize="sw"></div>
+                        <div part="resize-handle resize-handle-s" class="resize-handle resize-handle-s" data-resize="s"></div>
+                        <div part="resize-handle resize-handle-se" class="resize-handle resize-handle-se" data-resize="se"></div>
                     </div>
-                    
+                    <div part="rotate-handle-wrap" class="rotate-handle-wrap">
+                        <div part="rotate-handle" class="rotate-handle" data-rotate="rotate"></div>
+                    </div>
                 </div>
+
 
                 <div class="slot-wrapper">
                     <slot></slot>
