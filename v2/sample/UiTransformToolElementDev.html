@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko" >
+<head>
+    <title>Sample - UiTransformToolElement</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Script-Type" content="text/javascript">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="shortcut icon" href="http://www.mins01.com/favicon.ico"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script src="/js/ForGoogle.js"></script>
+    <!-- google analytics -->
+    <script>if(window.ForGoogle){ ForGoogle.analytics() }else{ console.log("failure : ForGoogle.analytics()");}</script>
+    
+
+    <!-- jquery 관련 -->
+    <!-- <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script> -->
+
+    <!-- 부트스트랩 5.3.x -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <!-- vue.js -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+    
+    <!-- meta og -->
+    
+    <meta property="og:title" content="Sample - UiTransformToolElement">
+    <meta property="og:description" content="Sample - UiTransformToolElement">
+    <meta property="og:image" content="http://www.mins01.com/img/logo.gif">
+    <meta property="og:image:width" content="190">
+    <meta property="og:image:height" content="70" />
+    <meta property="og:site_name" content="Sample - UiTransformToolElement" />
+    <meta property="og:type" content="website">
+    
+    <!-- //meta og -->
+    
+    <script type="module">
+        import UiTransformToolElement from '../src/UiTransformToolElementDev.js';
+        UiTransformToolElement.register();
+        
+    </script>
+    <style>
+        .transform-tool-target{
+            left: var(--left,0) !important;
+            top: var(--top,0) !important;
+            width: var(--width,0) !important;
+            height: var(--height,0) !important;
+            transform: rotate(var(--rotation,0deg)) scale( calc( var(--scale-x,1) * var(--zoom,1) ), calc( var(--scale-y,1) * var(--zoom,1) ) )  !important;
+        }
+        .transform-boundary{
+            position: relative;
+        }
+
+
+    </style>
+    
+</head>
+
+<body  >
+    <div class="container py-3 " id="container0" >
+        <h1>Sample - UiTransformToolElement</h1>
+        <hr>
+        <div>
+            HTMLElement 클래스를 상속받아 커스텀 엘레멘트를 만들고 그것이 transform toolпп럼 동작하게 한다.
+        </div>
+        <hr>
+        <h2>ex</h2>
+        <div class="my-3" >
+            <button type="button" class="btn btn-primary btn-sm" onclick="tft01.dataset.resizeOrigin = 'edge'">data-resize-origin="edge"</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="tft01.dataset.resizeOrigin = 'center'">data-resize-origin="center"</button>
+        </div>
+        <div class="my-3" style="height: 200vh;" >
+            <div class="d-flex gap-3 flex-wrap">
+                <div class="transform-tool-target rounded text-bg-success box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">1</div>
+                <div class="transform-tool-target rounded text-bg-success box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">2</div>
+                <div class="transform-tool-target rounded text-bg-success box-shadow" style="--width:200px;--height:200px;min-width:40px;min-height:40px;" onclick="tft01.setTarget(this);">3, min-width:40px;min-height:40px</div>
+                <div class="transform-tool-target rounded text-bg-success box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">4</div>
+                <div class="transform-tool-target rounded text-bg-success box-shadow" style="--width:200px;--height:200px;" onclick="tft01.setTarget(this);">5</div>    
+            </div>
+            <div class="transform-tool-target position-absolute rounded  box-shadow text-bg-primary" style="--width:200px;--height:200px;--left:400px;--top:200px;" onpointerdown="tft01.setTarget(this);tft01.handlePointerdown(event);" data-move="move">setTarget. down후 바로 이동 가능</div>
+            <div class="transform-tool-target position-absolute rounded  box-shadow text-bg-info" style="--width:80px;--height:80px;--left:100px;--top:100px;" onclick="tft01.setTarget(this);">setTarget</div>
+            <div class="transform-tool-target position-absolute rounded  box-shadow text-bg-info" style="--width:80px;--height:80px;--left:100px;--top:200px;" data-transform-tool-no-sync onclick="tft01.setTarget(this);">data-transform-tool-no-sync target 연결민하고 싱크 동작 안한다. event 에서 따로 처리.</div>
+            <div class="transform-tool-target position-absolute rounded  box-shadow text-bg-warning" style="--width:80px;--height:80px;--left:200px;--top:100px; --zoom:0.7" onclick="tft01.setTarget(this);">--zoom:0.7</div>
+            <div class="transform-tool-target position-absolute rounded  box-shadow text-bg-warning" style="--width:80px;--height:80px;--left:200px;--top:200px; --zoom:1.3" onclick="tft01.setTarget(this);">--zoom:1.3</div>
+            
+            
+            <div class="transform-boundary" style="background-color: #abc9; height: 500px;margin:20px">
+                자유 리사이즈
+                <ui-transform-tool id="tft011" left="50" top="50" width="123" height="214">
+                    edge, no data-clamp-boundary
+                </ui-transform-tool>
+                <ui-transform-tool id="tft011" data-clamp-boundary left="50" top="50" width="123" height="214">
+                    edge, data-clamp-boundary
+                </ui-transform-tool>
+                <ui-transform-tool id="tft012" data-clamp-boundary data-resize-origin="center" left="150" top="150" width="123" height="214" style="--handle-size:24px; --border-width:12px;--border-color:#f009;--border-style:dotted;">
+                    center, data-clamp-boundary
+                </ui-transform-tool>
+            </div>
+            <div class="transform-boundary" data-clamp-boundary style="background-color: #abc9; height: 500px;margin:20px">
+                비율 고정 리사이즈
+                <ui-transform-tool id="tft021" data-clamp-boundary data-lock-aspect-ratio left="50" top="50" width="123" height="214">
+                    edge, data-clamp-boundary
+                </ui-transform-tool>
+                <ui-transform-tool id="tft022" data-clamp-boundary data-lock-aspect-ratio data-resize-origin="center" left="150" top="150" width="123" height="214">
+                    center, data-clamp-boundary
+                </ui-transform-tool>
+            </div>
+        </div>
+        <hr>
+        <div class="p-3">
+            <h3>Broundary 가 변경되는 모양에서의 transform-tool 샘플</h3>
+            <div class="position-relative" class="transform-boundary">
+                <div class="rounded boarder border-1 bg-info flex-fill position-absolute transform-tool-target" id="tft31-box-01" style="--left:0px;--top:0px;--width:300px;--height:300px;" onclick="tft31Broundary.setTarget(this);">
+                    클릭으로 위치시킴
+                </div>
+                <div class="rounded boarder border-1 bg-warning flex-fill position-absolute transform-tool-target" style="--left:0px;--top:300px;--width:300px;--height:300px;" onclick="tft31Broundary.setTarget(this);">
+                    클릭으로 위치시킴
+                </div>
+                <div class="rounded boarder border-1 bg-danger flex-fill position-absolute transform-tool-target" style="--left:300px;--top:0px;--width:500px;--height:600px;" onclick="tft31Broundary.setTarget(this);">
+                    클릭으로 위치시킴
+                </div>
+    
+                <ui-transform-tool id="tft31Broundary" class="transform-boundary" data-no-move data-no-resize data-no-rotate data-no-border style="background-color: #c0c9;" left="100" top="300" width="123" height="214">
+                    <ui-transform-tool id="tft31" left="50" top="50" width="100" height="100" data-clamp-boundary data-lock-aspect-ratio>
+                        내부
+                    </ui-transform-tool>    
+                </ui-transform-tool>
+                <script>
+                    window.tft31Broundary = document.getElementById("tft31Broundary");
+                    window.tft31 = document.getElementById("tft31");
+                    window.addEventListener('load',(event)=>{
+                        tft31Broundary.setTarget(document.querySelector('#tft31-box-01'));
+    
+                    })
+                    tft31Broundary.addEventListener('transform-target-change', (e) => {
+                        tft31.clampToBoundary();
+                    })
+                    
+                </script>
+    
+    
+            </div>
+        </div>
+    </div>
+    
+    <ui-transform-tool id="tft01" class="show-when-has-target" left="100" top="300" width="123" height="214"></ui-transform-tool>
+
+
+    <ui-transform-tool class="transform-boundary" style="background-color: #0cc4; position: absolute;" left="100" top="300" width="300" height="300" data-no-rotate data-no-flip data-clamp-boundary>
+        <h3>속에 속 샘플</h3>
+        <div>rotate 해버리면 이상하지네. 핸들 숨긴다.</div>
+        <ui-transform-tool class="transform-boundary" style="background-color: #c0c4; position: absolute;" left="100" top="300" width="123" height="214" data-no-rotate data-no-flip data-clamp-boundary>
+            <ui-transform-tool left="50" top="50" width="100" height="100"  style="background-color: #cba4;"  data-clamp-boundary data-lock-aspect-ratio>
+                안
+            </ui-transform-tool>    
+        </ui-transform-tool>
+    </ui-transform-tool>
+
+    <script>
+        let syncTarget = null
+        const tft01 = document.getElementById("tft01");
+        // 수동 처리.
+        tft01.addEventListener('transform-target-change', (e) => {  
+            if(e.detail.target && e.detail.target.hasAttribute('data-transform-tool-no-sync')){
+                tft01.syncFrom(e.detail.target);
+                return; 
+            }
+        });        
+        tft01.addEventListener('transform-end', (e) => {  
+            if(e.detail.target && e.detail.target.hasAttribute('data-transform-tool-no-sync')){
+                tft01.syncTo(e.detail.target);
+                return; 
+            }
+        });
+        
+    </script>
+
+
+
+
+
+    <script>
+        const fn1 = (e) => { const target = e.target
+            console.log(
+                e.type,
+                JSON.stringify(target),
+                target.getLocalRect(),
+                target.getViewportRect(),
+                target.getPageRect(),
+            ) 
+        };
+        window.addEventListener('transform-start', fn1);
+        window.addEventListener('transform-update', fn1);
+        window.addEventListener('transform-end', fn1);
+        window.addEventListener('transform-target-change', fn1);
+        window.addEventListener('transform-target-sync', fn1);
+        window.addEventListener('click', (e) => {
+            if(!e.target.matches('.transform-tool-target, ui-transform-tool')){ tft01.setTarget(null); return false; } 
+        });
+    </script>
+</body>
+</html>
