@@ -238,6 +238,24 @@ export default class UiColorBarElement extends HTMLElement {
         target.style.setProperty('--zoom', this.zoom);
         target.classList.toggle('is-zoomed', this.zoom !== 1);
     }
+    computeMatrix(left, top, width, height, rotation, scaleX, scaleY) {
+        const matrix = new DOMMatrix();
+        matrix.translateSelf(left, top);
+        matrix.translateSelf(width / 2, height / 2);
+        matrix.rotateSelf(rotation);
+        matrix.scaleSelf(scaleX, scaleY);
+        matrix.translateSelf(-width / 2, -height / 2);
+        return matrix;
+    }
+    #matrix = null;
+    refreshMatrix(){
+        this.#matrix = this.computeMatrix(this.#left, this.#top, this.#width, this.#height, this.#rotation, this.#zoom*this.scaleX, this.#zoom*this.scaleY);
+    }
+    get matrix() {
+        this.refreshMatrix();
+        // if (!this.#matrix) { this.refreshMatrix(); }
+        return this.#matrix;
+    }
 
     rotatePoint(x, y, cx, cy, angle) {
         const rad = angle * Math.PI / 180;
@@ -351,6 +369,15 @@ export default class UiColorBarElement extends HTMLElement {
         // 시작 포인터 world 좌표 저장 (delta 계산용)
         this.#startWorldX = event.clientX - this.#boundaryRect.left;
         this.#startWorldY = event.clientY - this.#boundaryRect.top;
+
+
+        //  현재 툴 안의 내부 로컬 좌표가 구해진다. 회전해도 같은 값을 가진다.
+        // {
+        //     const matrix = this.matrix
+        //     const matrixInv = matrix.inverse();
+        //     const sp = matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+        //     console.log('xxx',{x:event.clientX,y:event.clientY},{x:sp.x,y:sp.y});
+        // }
 
         // anchor의 world 좌표 (드래그 중 고정)
         const rad = this.#rotation0 * Math.PI / 180;
