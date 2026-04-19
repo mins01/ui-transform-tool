@@ -247,9 +247,33 @@ export default class UiColorBarElement extends HTMLElement {
         matrix.translateSelf(-width / 2, -height / 2);
         return matrix;
     }
+    getBoundaryMatrices() {
+        if(this.#boundary?.getMatrices){
+            return this.#boundary.getMatrices();
+        }
+        return [];
+    }
+    // 부오와 연계해서 계산
+    getMatrices(){
+        let matrices = this.getBoundaryMatrices();
+        const matrix = this.computeMatrix(this.#left, this.#top, this.#width, this.#height, this.#rotation, this.#zoom*this.scaleX, this.#zoom*this.scaleY);
+        matrices.push(matrix);
+        // console.log(matrices);
+        return matrices;
+    }
+    getBoundaryMatrix(){
+        const matrices = this.getBoundaryMatrices();
+        const matrix = matrices.reduce( (acc, m) => acc.multiply(m), new DOMMatrix() );
+        return matrix;
+    }
+    getMatrix(){
+        const matrices = this.getMatrices();
+        const matrix = matrices.reduce( (acc, m) => acc.multiply(m), new DOMMatrix() );
+        return matrix;
+    }
     #matrix = null;
     refreshMatrix(){
-        this.#matrix = this.computeMatrix(this.#left, this.#top, this.#width, this.#height, this.#rotation, this.#zoom*this.scaleX, this.#zoom*this.scaleY);
+        this.#matrix = this.getMatrix();
     }
     get matrix() {
         this.refreshMatrix();
@@ -324,13 +348,34 @@ export default class UiColorBarElement extends HTMLElement {
             this.#transformType = 'move'
             this.#left0 = this.#left;
             this.#top0 = this.#top;
-            this.#x0 = event.clientX - this.#boundaryRect.left;
-            this.#y0 = event.clientY - this.#boundaryRect.top;
+            // this.#x0 = event.clientX - this.#boundaryRect.left;
+            // this.#y0 = event.clientY - this.#boundaryRect.top;
+
+
+            
+            // 현재 툴 안의 내부 로컬 좌표가 구해진다. 회전해도 같은 값을 가진다.
+            // 시작 포인터 local 좌표 저장 (delta 계산용)
+            {
+                this.matrixInv = this.getBoundaryMatrix().inverse();
+                this.#startLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+            }
+
         } else if (target.dataset.rotate) {
             this.#transformType = 'rotate'
             this.#rotation0 = this.#rotation;
-            this.#x0 = this.#left + this.#width / 2;
-            this.#y0 = this.#top + this.#height / 2;
+            // this.#x0 = this.#left + this.#width / 2;
+            // this.#y0 = this.#top + this.#height / 2;
+
+            // 부모 매트릭스를 쓰므로 left,top 이동해야함
+            this.#cx0 = this.#left + this.#width / 2
+            this.#cy0 = this.#top + this.#height / 2
+            // 현재 툴 안의 내부 로컬 좌표가 구해진다. 회전해도 같은 값을 가진다.
+            // 시작 포인터 local 좌표 저장 (delta 계산용)
+            {
+                this.matrixInv = this.getBoundaryMatrix().inverse();
+                this.#startLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+            }
+
         } else if (target.dataset.resize) {
             this.#handlePointerdownForResize(event);
         }
@@ -341,11 +386,11 @@ export default class UiColorBarElement extends HTMLElement {
     #cy0 = null
     #anchorLocal = null
     #handleLocal = null
-    #startWorldX = null
-    #startWorldY = null
+    // #startWorldX = null
+    // #startWorldY = null
     #anchorWorldX = null
     #anchorWorldY = null
-
+    #startLocal = null;
     #handlePointerdownForResize(event) {
         this.#transformType = 'resize';
         this.#resizeType = event.target.dataset.resize;
@@ -366,17 +411,16 @@ export default class UiColorBarElement extends HTMLElement {
         this.#anchorLocal = this.#getAnchorLocal(this.#resizeType);
         this.#handleLocal = this.#getHandleLocal(this.#resizeType);
 
-        // 시작 포인터 world 좌표 저장 (delta 계산용)
-        this.#startWorldX = event.clientX - this.#boundaryRect.left;
-        this.#startWorldY = event.clientY - this.#boundaryRect.top;
+        // 시작 포인터 world 좌표 저장 (delta 계산용) @deprecated
+        // this.#startWorldX = event.clientX - this.#boundaryRect.left;
+        // this.#startWorldY = event.clientY - this.#boundaryRect.top;
 
 
         //  현재 툴 안의 내부 로컬 좌표가 구해진다. 회전해도 같은 값을 가진다.
+        // 시작 포인터 local 좌표 저장 (delta 계산용)
         {
-            const matrix = this.matrix
-            const matrixInv = matrix.inverse();
-            const sp = matrixInv.transformPoint({x:event.clientX,y:event.clientY});
-            console.log('xxx',{x:event.clientX,y:event.clientY},{x:sp.x,y:sp.y});
+            this.matrixInv = this.matrix.inverse();
+            this.#startLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
         }
 
         // anchor의 world 좌표 (드래그 중 고정)
@@ -392,18 +436,29 @@ export default class UiColorBarElement extends HTMLElement {
         if (!target.hasPointerCapture(event.pointerId)) return;
 
         if (this.#transformType === 'move') {
-            const x1 = event.clientX - this.#boundaryRect.left;
-            const y1 = event.clientY - this.#boundaryRect.top;
-            const left = this.#left0 + x1 - this.#x0;
-            const top = this.#top0 + y1 - this.#y0;
+            // const x1 = event.clientX - this.#boundaryRect.left;
+            // const y1 = event.clientY - this.#boundaryRect.top;
+            // const left = this.#left0 + x1 - this.#x0;
+            // const top = this.#top0 + y1 - this.#y0;
+            
+            const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+            const left = this.#left0 + currentLocal.x - this.#startLocal.x;
+            const top = this.#top0 + currentLocal.y - this.#startLocal.y;
+
             this.moveTo(left, top);
             this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'move',handle:event.target})
         } else if (this.#transformType === 'rotate') {
-            const x1 = event.clientX - this.#boundaryRect.left;
-            const y1 = event.clientY - this.#boundaryRect.top;
-            const rad = Math.atan2(y1 - this.#y0, x1 - this.#x0);
+            // const x1 = event.clientX - this.#boundaryRect.left;
+            // const y1 = event.clientY - this.#boundaryRect.top;
+            // const rad = Math.atan2(y1 - this.#y0, x1 - this.#x0);
+            // const rotation = (rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
+
+
+            const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+            const rad = Math.atan2(currentLocal.y - this.#cy0, currentLocal.x - this.#cx0);
             const rotation = (rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
+
             this.rotateTo(rotation);
             this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'rotate',handle:event.target})
@@ -459,13 +514,22 @@ export default class UiColorBarElement extends HTMLElement {
 
     // delta를 local 좌표로 변환
     #deltaToLocal(event) {
-        const rad = -this.#rotation0 * Math.PI / 180;
-        const dwx = event.clientX - this.#boundaryRect.left - this.#startWorldX;
-        const dwy = event.clientY - this.#boundaryRect.top - this.#startWorldY;
-        return {
-            x: dwx * Math.cos(rad) - dwy * Math.sin(rad),
-            y: dwx * Math.sin(rad) + dwy * Math.cos(rad),
-        };
+
+        const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+        console.log('currentLocal',this.#startLocal.x,this.#startLocal.y,currentLocal.x,currentLocal.y);
+        
+        return{
+            x: currentLocal.x - this.#startLocal.x,
+            y: currentLocal.y - this.#startLocal.y
+        }
+
+        // const rad = -this.#rotation0 * Math.PI / 180;
+        // const dwx = event.clientX - this.#boundaryRect.left - this.#startWorldX;
+        // const dwy = event.clientY - this.#boundaryRect.top - this.#startWorldY;
+        // return {
+        //     x: dwx * Math.cos(rad) - dwy * Math.sin(rad),
+        //     y: dwx * Math.sin(rad) + dwy * Math.cos(rad),
+        // };
     }
 
     // 반대편 기준 리사이즈
@@ -676,7 +740,7 @@ export default class UiColorBarElement extends HTMLElement {
     #boundaryRect = null
     clampToBoundary(refreshBoundaryRect = true){
         if(this.hasAttribute('data-clamp-boundary') && this.#boundary){
-            if(refreshBoundaryRect) this.#boundaryRect = this.#boundary.getBoundingClientRect();
+            if(refreshBoundaryRect) this.#boundaryRect = this.#boundary?.getViewportRect?this.#boundary?.getViewportRect():this.#boundary.getBoundingClientRect();
             this.clampToRect(this.#boundaryRect);
         }
     }
