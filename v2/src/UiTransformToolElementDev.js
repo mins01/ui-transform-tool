@@ -740,7 +740,7 @@ export default class UiColorBarElement extends HTMLElement {
     #boundaryRect = null
     clampToBoundary(refreshBoundaryRect = true){
         if(this.hasAttribute('data-clamp-boundary') && this.#boundary){
-            if(refreshBoundaryRect) this.#boundaryRect = this.#boundary?.getViewportRect?this.#boundary?.getViewportRect():this.#boundary.getBoundingClientRect();
+            if(refreshBoundaryRect) this.#boundaryRect = this.#boundary.getViewportRect?.()??this.#boundary.getBoundingClientRect();
             this.clampToRect(this.#boundaryRect);
         }
     }
