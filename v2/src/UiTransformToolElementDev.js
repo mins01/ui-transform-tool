@@ -250,6 +250,11 @@ export default class UiColorBarElement extends HTMLElement {
     getBoundaryMatrices() {
         if(this.#boundary?.getMatrices){
             return this.#boundary.getMatrices();
+        }else{ // transformTool 이 아닌 경우
+            if(this.#boundaryRect){
+                const matrix = this.computeMatrix(this.#boundaryRect.left, this.#boundaryRect.top, this.#boundaryRect.width, this.#boundaryRect.height, 0, 1, 1);
+                return [matrix];
+            }
         }
         return [];
     }
