@@ -238,6 +238,14 @@ export default class UiColorBarElement extends HTMLElement {
         target.style.setProperty('--zoom', this.zoom);
         target.classList.toggle('is-zoomed', this.zoom !== 1);
     }
+
+
+
+
+
+    // ------------- 매트릭스 처리 --------------
+
+    // 매트릭스 계산
     computeMatrix(left, top, width, height, rotation, scaleX, scaleY) {
         const matrix = new DOMMatrix();
         matrix.translateSelf(left, top);
@@ -247,6 +255,7 @@ export default class UiColorBarElement extends HTMLElement {
         matrix.translateSelf(-width / 2, -height / 2);
         return matrix;
     }
+    // 부모들의 매트릭스 배경
     getBoundaryMatrices() {
         if(this.#boundary?.getMatrices){
             return this.#boundary.getMatrices();
@@ -258,7 +267,13 @@ export default class UiColorBarElement extends HTMLElement {
         }
         return [];
     }
-    // 부오와 연계해서 계산
+    // 모든 부모를 합친 매트릭스
+    getBoundaryMatrix(){
+        const matrices = this.getBoundaryMatrices();
+        const matrix = matrices.reduce( (acc, m) => acc.multiply(m), new DOMMatrix() );
+        return matrix;
+    }
+    // 부모와 연계해서 계산
     getMatrices(){
         let matrices = this.getBoundaryMatrices();
         const matrix = this.computeMatrix(this.#left, this.#top, this.#width, this.#height, this.#rotation, this.#zoom*this.scaleX, this.#zoom*this.scaleY);
@@ -266,25 +281,13 @@ export default class UiColorBarElement extends HTMLElement {
         // console.log(matrices);
         return matrices;
     }
-    getBoundaryMatrix(){
-        const matrices = this.getBoundaryMatrices();
-        const matrix = matrices.reduce( (acc, m) => acc.multiply(m), new DOMMatrix() );
-        return matrix;
-    }
+    // 보모 포함 자기자신의 매트릭스
     getMatrix(){
         const matrices = this.getMatrices();
         const matrix = matrices.reduce( (acc, m) => acc.multiply(m), new DOMMatrix() );
         return matrix;
     }
-    #matrix = null;
-    refreshMatrix(){
-        this.#matrix = this.getMatrix();
-    }
-    get matrix() {
-        this.refreshMatrix();
-        // if (!this.#matrix) { this.refreshMatrix(); }
-        return this.#matrix;
-    }
+
 
     rotatePoint(x, y, cx, cy, angle) {
         const rad = angle * Math.PI / 180;
@@ -424,7 +427,7 @@ export default class UiColorBarElement extends HTMLElement {
         //  현재 툴 안의 내부 로컬 좌표가 구해진다. 회전해도 같은 값을 가진다.
         // 시작 포인터 local 좌표 저장 (delta 계산용)
         {
-            this.matrixInv = this.matrix.inverse();
+            this.matrixInv = this.getMatrix().inverse();
             this.#startLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
         }
 
@@ -489,14 +492,14 @@ export default class UiColorBarElement extends HTMLElement {
         const w = this.#width0;
         const h = this.#height0;
         switch (type) {
-            case "nw": return { x: -w / 2, y: -h / 2 };
-            case "n":  return { x: 0,       y: -h / 2 };
-            case "ne": return { x:  w / 2,  y: -h / 2 };
-            case "w":  return { x: -w / 2,  y: 0 };
-            case "e":  return { x:  w / 2,  y: 0 };
-            case "sw": return { x: -w / 2,  y:  h / 2 };
-            case "s":  return { x: 0,       y:  h / 2 };
             case "se": return { x:  w / 2,  y:  h / 2 };
+            case "nw": return { x: -w / 2, y: -h / 2 };
+            case "ne": return { x:  w / 2,  y: -h / 2 };
+            case "sw": return { x: -w / 2,  y:  h / 2 };
+            case "n":  return { x: 0,       y: -h / 2 };
+            case "s":  return { x: 0,       y:  h / 2 };
+            case "e":  return { x:  w / 2,  y: 0 };
+            case "w":  return { x: -w / 2,  y: 0 };
         }
     }
 
@@ -506,13 +509,13 @@ export default class UiColorBarElement extends HTMLElement {
 
         switch (type) {
             case "se": return { x: -w / 2, y: -h / 2 };
-            case "nw": return { x: w / 2, y: h / 2 };
-            case "ne": return { x: -w / 2, y: h / 2 };
-            case "sw": return { x: w / 2, y: -h / 2 };
+            case "nw": return { x:  w / 2, y:  h / 2 };
+            case "ne": return { x: -w / 2, y:  h / 2 };
+            case "sw": return { x:  w / 2, y: -h / 2 };
 
-            case "n": return { x: 0, y: h / 2 };
-            case "s": return { x: 0, y: -h / 2 };
-            case "w": return { x: w / 2, y: 0 };
+            case "n": return { x: 0     , y:  h / 2 };
+            case "s": return { x: 0     , y: -h / 2 };
+            case "w": return { x:  w / 2, y: 0 };
             case "e": return { x: -w / 2, y: 0 };
         }
     }
@@ -618,6 +621,11 @@ export default class UiColorBarElement extends HTMLElement {
         const cxWorld = this.#anchorWorldX - (aOffX * cos - aOffY * sin);
         const cyWorld = this.#anchorWorldY - (aOffX * sin + aOffY * cos);
 
+        //  이부분 기준 좌표를 기준으로 너비 높이 변화로 처리되도록 개선하자.
+        // console.log('xxxxxxxxxxxxx',cxWorld - width / 2, cyWorld - height / 2, width, height);
+        // console.log('xxxxxxxxxxxxx',this.#left0 - aOffX,this.#top0 - aOffY, width, height);
+        // console.log('xxxxxxxxxxxyy',left,this.#cx0,right,top,bottom);
+        
         this.setRect(cxWorld - width / 2, cyWorld - height / 2, width, height);
     }
 
