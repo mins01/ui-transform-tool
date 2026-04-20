@@ -921,9 +921,9 @@ export default class UiColorBarElement extends HTMLElement {
                     left: 50%;
                     top: 100%;
                     transform: translate(-50%, 0%);
-                    bottom: calc(var(--handle-size,12px) * -2);
+                    bottom: calc(var(--handle-size,12px) * -2  / var(--zoom,1) / var(--inherit-zoom,1) );
                     width: 0px;
-                    border-right: var(--border-width,2px) var(--border-style,dashed) var(--border-color,#000);
+                    border-right: calc( var(--border-width,2px) / var(--zoom,1) / var(--inherit-zoom,1) ) var(--border-style,dashed) var(--border-color,#000);
                     box-sizing: content-box;
                 }
                 :host .rotate-handle{
