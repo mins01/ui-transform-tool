@@ -276,7 +276,7 @@ export default class UiColorBarElement extends HTMLElement {
     // 부모와 연계해서 계산
     getMatrices(){
         let matrices = this.getBoundaryMatrices();       
-        const matrix = this.computeMatrix(this.#left, this.#top, this.#width, this.#height, this.#rotation, this.#zoom*this.scaleX, this.#zoom*this.scaleY);
+        const matrix = this.computeMatrix(this.#left, this.#top, this.#width, this.#height, this.#rotation, this.scaleX, this.scaleY);
         matrices.push(matrix);
         // console.log(matrices);
         return matrices;
@@ -818,7 +818,7 @@ export default class UiColorBarElement extends HTMLElement {
                     transform: translate(var(--left,0),var(--top,0)) rotate(var(--rotation,0deg)) scale(calc(var(--scale-x,1) * var(--zoom,1) ), calc( var(--scale-y,1) * var(--zoom,1)));
                     pointer-events: none;
                     z-index: 3;
-                    --parent-zoom: var(--boundary-zoom, 1);
+                    --inherit-zoom: var(--return-zoom, 1);
                 }
                 :host(.show-when-has-target:not(.has-target)){
                     display: none;
@@ -837,15 +837,16 @@ export default class UiColorBarElement extends HTMLElement {
                     z-index: 1;
                     left: 50%;
                     top: 50%;
-                    transform: translate(-50%, -50%);
+                    transform: translate(-50%, -50%) scale(calc(1 / var(--zoom,1) / var(--inherit-zoom,1) ));
                 }
-                :host(.is-zoomed) .content-border{
+                :host(.is-zoomed) .content-border,
+                :host-context(.is-zoomed) .content-border{
                     outline: var(--content-border-width, 1px) var(--content-border-style, dashed) var(--content-border-color, #f009);
                 }
                 :host .border{
                     pointer-events: none;
                     position: absolute;
-                    outline: var(--border-width, 2px) var(--border-style, dashed) var(--border-color, #000);
+                    outline: calc( var(--border-width, 2px) / var(--zoom,1) / var(--inherit-zoom,1) ) var(--border-style, dashed) var(--border-color, #000);
                     inset:0;
                 }
                 :host([data-no-border]) .border{
@@ -859,7 +860,8 @@ export default class UiColorBarElement extends HTMLElement {
                     top: 50%;
                     width: max(100%, var(--controls-min-size, 80px));
                     height: max(100%, var(--controls-min-size, 80px));
-                    transform: translate(-50%, -50%) scale(calc(1 / var(--zoom,1) / var(--parent-zoom,1) ));
+                    x-transform: translate(-50%, -50%) scale(calc(1 / var(--zoom,1) / var(--inherit-zoom,1) ));
+                    transform: translate(-50%, -50%);
                 }
                 :host .resize-handles{
                     pointer-events: none;
@@ -893,7 +895,7 @@ export default class UiColorBarElement extends HTMLElement {
                     contain: strict;
                     overflow: hidden;
                     background-color: #fff;
-                    transform: translate(-50%, -50%);
+                    transform: translate(-50%, -50%)  scale(calc(1 / var(--zoom,1) / var(--inherit-zoom,1) ));;
                 }
                 :host([data-no-resize]) .resize-handle{
                     pointer-events: none;
@@ -938,7 +940,7 @@ export default class UiColorBarElement extends HTMLElement {
                     contain: strict;
                     overflow: hidden;
                     background-color: #fff;
-                    transform: translate(calc(-50% + var(--border-width,2px) / 2), 50%);
+                    transform: translate(calc(-50% + var(--border-width,2px) / 2), 50%)  scale(calc(1 / var(--zoom,1) / var(--inherit-zoom,1) ));
                 }
                 :host .rotate-handle.is-active{
                     filter:invert(1);
@@ -955,7 +957,7 @@ export default class UiColorBarElement extends HTMLElement {
                     justify-content: center;
                     align-items: center;
 
-                    --boundary-zoom: var(--zoom,1);
+                    --return-zoom: calc( var(--inherit-zoom,1) * var(--zoom,1) );
                 }
             </style>
             ${this.constructor.appendStyle}
