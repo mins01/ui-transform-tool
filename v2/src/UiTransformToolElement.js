@@ -523,21 +523,12 @@ export default class UiColorBarElement extends HTMLElement {
     // delta를 local 좌표로 변환
     #deltaToLocal(event) {
 
-        const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
-        console.log('currentLocal',this.#startLocal.x,this.#startLocal.y,currentLocal.x,currentLocal.y);
-        
+        const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});        
         return{
             x: currentLocal.x - this.#startLocal.x,
             y: currentLocal.y - this.#startLocal.y
         }
 
-        // const rad = -this.#rotation0 * Math.PI / 180;
-        // const dwx = event.clientX - this.#boundaryRect.left - this.#startWorldX;
-        // const dwy = event.clientY - this.#boundaryRect.top - this.#startWorldY;
-        // return {
-        //     x: dwx * Math.cos(rad) - dwy * Math.sin(rad),
-        //     y: dwx * Math.sin(rad) + dwy * Math.cos(rad),
-        // };
     }
 
     // 반대편 기준 리사이즈
@@ -621,11 +612,6 @@ export default class UiColorBarElement extends HTMLElement {
         const cxWorld = this.#anchorWorldX - (aOffX * cos - aOffY * sin);
         const cyWorld = this.#anchorWorldY - (aOffX * sin + aOffY * cos);
 
-        //  이부분 기준 좌표를 기준으로 너비 높이 변화로 처리되도록 개선하자.
-        // console.log('xxxxxxxxxxxxx',cxWorld - width / 2, cyWorld - height / 2, width, height);
-        // console.log('xxxxxxxxxxxxx',this.#left0 - aOffX,this.#top0 - aOffY, width, height);
-        // console.log('xxxxxxxxxxxyy',left,this.#cx0,right,top,bottom);
-        
         this.setRect(cxWorld - width / 2, cyWorld - height / 2, width, height);
     }
 
