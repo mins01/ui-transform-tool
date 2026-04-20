@@ -275,7 +275,7 @@ export default class UiColorBarElement extends HTMLElement {
     }
     // 부모와 연계해서 계산
     getMatrices(){
-        let matrices = this.getBoundaryMatrices();
+        let matrices = this.getBoundaryMatrices();       
         const matrix = this.computeMatrix(this.#left, this.#top, this.#width, this.#height, this.#rotation, this.#zoom*this.scaleX, this.#zoom*this.scaleY);
         matrices.push(matrix);
         // console.log(matrices);
@@ -815,9 +815,10 @@ export default class UiColorBarElement extends HTMLElement {
                     top:0;
                     width: var(--width,0);
                     height: var(--height,0);
-                    transform: translate(var(--left,0),var(--top,0)) rotate(var(--rotation,0deg)) scale(var(--scale-x,1),var(--scale-y,1));
+                    transform: translate(var(--left,0),var(--top,0)) rotate(var(--rotation,0deg)) scale(calc(var(--scale-x,1) * var(--zoom,1) ), calc( var(--scale-y,1) * var(--zoom,1)));
                     pointer-events: none;
                     z-index: 3;
+                    --parent-zoom: var(--boundary-zoom, 1);
                 }
                 :host(.show-when-has-target:not(.has-target)){
                     display: none;
@@ -829,8 +830,10 @@ export default class UiColorBarElement extends HTMLElement {
                 :host .content-border{
                     position: absolute;
                     inset:0;
-                    width: calc(var(--width) *  var(--zoom,1) );
-                    height: calc(var(--height) *  var(--zoom,1) );
+                    xwidth: calc(var(--width) *  var(--zoom,1) );
+                    xheight: calc(var(--height) *  var(--zoom,1) );
+                    width: var(--width);
+                    height: var(--height);
                     z-index: 1;
                     left: 50%;
                     top: 50%;
@@ -856,7 +859,7 @@ export default class UiColorBarElement extends HTMLElement {
                     top: 50%;
                     width: max(100%, var(--controls-min-size, 80px));
                     height: max(100%, var(--controls-min-size, 80px));
-                    transform: translate(-50%, -50%);
+                    transform: translate(-50%, -50%) scale(calc(1 / var(--zoom,1) / var(--parent-zoom,1) ));
                 }
                 :host .resize-handles{
                     pointer-events: none;
@@ -951,14 +954,17 @@ export default class UiColorBarElement extends HTMLElement {
                     flex-direction: column;
                     justify-content: center;
                     align-items: center;
+
+                    --boundary-zoom: var(--zoom,1);
                 }
             </style>
             ${this.constructor.appendStyle}
             <div part="wapper" class="wapper">                
-                <div part="border" class="border"></div>
+                
                 <div part="content-border" class="content-border"></div>
 
                 <div class="controls">
+                    <div part="border" class="border"></div>
                     <div part="move-handle-area move-handle" class="move-handle-area move-handle" data-move="move"></div>
                     <div part="resize-handles" class="resize-handles" >
                         <div part="resize-handle resize-handle-c move-handle" class="resize-handle resize-handle-c move-handle" data-resize="c" data-move="move"></div>
