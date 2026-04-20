@@ -239,6 +239,56 @@ export default class UiColorBarElement extends HTMLElement {
         target.classList.toggle('is-zoomed', this.zoom !== 1);
     }
 
+
+
+
+
+    // ------------- 매트릭스 처리 --------------
+
+    // 매트릭스 계산
+    computeMatrix(left, top, width, height, rotation, scaleX, scaleY) {
+        const matrix = new DOMMatrix();
+        matrix.translateSelf(left, top);
+        matrix.translateSelf(width / 2, height / 2);
+        matrix.rotateSelf(rotation);
+        matrix.scaleSelf(scaleX, scaleY);
+        matrix.translateSelf(-width / 2, -height / 2);
+        return matrix;
+    }
+    // 부모들의 매트릭스 배경
+    getBoundaryMatrices() {
+        if(this.#boundary?.getMatrices){
+            return this.#boundary.getMatrices();
+        }else{ // transformTool 이 아닌 경우
+            if(this.#boundaryRect){
+                const matrix = this.computeMatrix(this.#boundaryRect.left, this.#boundaryRect.top, this.#boundaryRect.width, this.#boundaryRect.height, 0, 1, 1);
+                return [matrix];
+            }
+        }
+        return [];
+    }
+    // 모든 부모를 합친 매트릭스
+    getBoundaryMatrix(){
+        const matrices = this.getBoundaryMatrices();
+        const matrix = matrices.reduce( (acc, m) => acc.multiply(m), new DOMMatrix() );
+        return matrix;
+    }
+    // 부모와 연계해서 계산
+    getMatrices(){
+        let matrices = this.getBoundaryMatrices();
+        const matrix = this.computeMatrix(this.#left, this.#top, this.#width, this.#height, this.#rotation, this.#zoom*this.scaleX, this.#zoom*this.scaleY);
+        matrices.push(matrix);
+        // console.log(matrices);
+        return matrices;
+    }
+    // 보모 포함 자기자신의 매트릭스
+    getMatrix(){
+        const matrices = this.getMatrices();
+        const matrix = matrices.reduce( (acc, m) => acc.multiply(m), new DOMMatrix() );
+        return matrix;
+    }
+
+
     rotatePoint(x, y, cx, cy, angle) {
         const rad = angle * Math.PI / 180;
         const cos = Math.cos(rad);
@@ -306,13 +356,34 @@ export default class UiColorBarElement extends HTMLElement {
             this.#transformType = 'move'
             this.#left0 = this.#left;
             this.#top0 = this.#top;
-            this.#x0 = event.clientX - this.#boundaryRect.left;
-            this.#y0 = event.clientY - this.#boundaryRect.top;
+            // this.#x0 = event.clientX - this.#boundaryRect.left;
+            // this.#y0 = event.clientY - this.#boundaryRect.top;
+
+
+            
+            // 현재 툴 안의 내부 로컬 좌표가 구해진다. 회전해도 같은 값을 가진다.
+            // 시작 포인터 local 좌표 저장 (delta 계산용)
+            {
+                this.matrixInv = this.getBoundaryMatrix().inverse();
+                this.#startLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+            }
+
         } else if (target.dataset.rotate) {
             this.#transformType = 'rotate'
             this.#rotation0 = this.#rotation;
-            this.#x0 = this.#left + this.#width / 2;
-            this.#y0 = this.#top + this.#height / 2;
+            // this.#x0 = this.#left + this.#width / 2;
+            // this.#y0 = this.#top + this.#height / 2;
+
+            // 부모 매트릭스를 쓰므로 left,top 이동해야함
+            this.#cx0 = this.#left + this.#width / 2
+            this.#cy0 = this.#top + this.#height / 2
+            // 현재 툴 안의 내부 로컬 좌표가 구해진다. 회전해도 같은 값을 가진다.
+            // 시작 포인터 local 좌표 저장 (delta 계산용)
+            {
+                this.matrixInv = this.getBoundaryMatrix().inverse();
+                this.#startLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+            }
+
         } else if (target.dataset.resize) {
             this.#handlePointerdownForResize(event);
         }
@@ -323,11 +394,11 @@ export default class UiColorBarElement extends HTMLElement {
     #cy0 = null
     #anchorLocal = null
     #handleLocal = null
-    #startWorldX = null
-    #startWorldY = null
+    // #startWorldX = null
+    // #startWorldY = null
     #anchorWorldX = null
     #anchorWorldY = null
-
+    #startLocal = null;
     #handlePointerdownForResize(event) {
         this.#transformType = 'resize';
         this.#resizeType = event.target.dataset.resize;
@@ -348,9 +419,17 @@ export default class UiColorBarElement extends HTMLElement {
         this.#anchorLocal = this.#getAnchorLocal(this.#resizeType);
         this.#handleLocal = this.#getHandleLocal(this.#resizeType);
 
-        // 시작 포인터 world 좌표 저장 (delta 계산용)
-        this.#startWorldX = event.clientX - this.#boundaryRect.left;
-        this.#startWorldY = event.clientY - this.#boundaryRect.top;
+        // 시작 포인터 world 좌표 저장 (delta 계산용) @deprecated
+        // this.#startWorldX = event.clientX - this.#boundaryRect.left;
+        // this.#startWorldY = event.clientY - this.#boundaryRect.top;
+
+
+        //  현재 툴 안의 내부 로컬 좌표가 구해진다. 회전해도 같은 값을 가진다.
+        // 시작 포인터 local 좌표 저장 (delta 계산용)
+        {
+            this.matrixInv = this.getMatrix().inverse();
+            this.#startLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+        }
 
         // anchor의 world 좌표 (드래그 중 고정)
         const rad = this.#rotation0 * Math.PI / 180;
@@ -365,18 +444,29 @@ export default class UiColorBarElement extends HTMLElement {
         if (!target.hasPointerCapture(event.pointerId)) return;
 
         if (this.#transformType === 'move') {
-            const x1 = event.clientX - this.#boundaryRect.left;
-            const y1 = event.clientY - this.#boundaryRect.top;
-            const left = this.#left0 + x1 - this.#x0;
-            const top = this.#top0 + y1 - this.#y0;
+            // const x1 = event.clientX - this.#boundaryRect.left;
+            // const y1 = event.clientY - this.#boundaryRect.top;
+            // const left = this.#left0 + x1 - this.#x0;
+            // const top = this.#top0 + y1 - this.#y0;
+            
+            const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+            const left = this.#left0 + currentLocal.x - this.#startLocal.x;
+            const top = this.#top0 + currentLocal.y - this.#startLocal.y;
+
             this.moveTo(left, top);
             this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'move',handle:event.target})
         } else if (this.#transformType === 'rotate') {
-            const x1 = event.clientX - this.#boundaryRect.left;
-            const y1 = event.clientY - this.#boundaryRect.top;
-            const rad = Math.atan2(y1 - this.#y0, x1 - this.#x0);
+            // const x1 = event.clientX - this.#boundaryRect.left;
+            // const y1 = event.clientY - this.#boundaryRect.top;
+            // const rad = Math.atan2(y1 - this.#y0, x1 - this.#x0);
+            // const rotation = (rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
+
+
+            const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+            const rad = Math.atan2(currentLocal.y - this.#cy0, currentLocal.x - this.#cx0);
             const rotation = (rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
+
             this.rotateTo(rotation);
             this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'rotate',handle:event.target})
@@ -402,14 +492,14 @@ export default class UiColorBarElement extends HTMLElement {
         const w = this.#width0;
         const h = this.#height0;
         switch (type) {
-            case "nw": return { x: -w / 2, y: -h / 2 };
-            case "n":  return { x: 0,       y: -h / 2 };
-            case "ne": return { x:  w / 2,  y: -h / 2 };
-            case "w":  return { x: -w / 2,  y: 0 };
-            case "e":  return { x:  w / 2,  y: 0 };
-            case "sw": return { x: -w / 2,  y:  h / 2 };
-            case "s":  return { x: 0,       y:  h / 2 };
             case "se": return { x:  w / 2,  y:  h / 2 };
+            case "nw": return { x: -w / 2, y: -h / 2 };
+            case "ne": return { x:  w / 2,  y: -h / 2 };
+            case "sw": return { x: -w / 2,  y:  h / 2 };
+            case "n":  return { x: 0,       y: -h / 2 };
+            case "s":  return { x: 0,       y:  h / 2 };
+            case "e":  return { x:  w / 2,  y: 0 };
+            case "w":  return { x: -w / 2,  y: 0 };
         }
     }
 
@@ -419,26 +509,35 @@ export default class UiColorBarElement extends HTMLElement {
 
         switch (type) {
             case "se": return { x: -w / 2, y: -h / 2 };
-            case "nw": return { x: w / 2, y: h / 2 };
-            case "ne": return { x: -w / 2, y: h / 2 };
-            case "sw": return { x: w / 2, y: -h / 2 };
+            case "nw": return { x:  w / 2, y:  h / 2 };
+            case "ne": return { x: -w / 2, y:  h / 2 };
+            case "sw": return { x:  w / 2, y: -h / 2 };
 
-            case "n": return { x: 0, y: h / 2 };
-            case "s": return { x: 0, y: -h / 2 };
-            case "w": return { x: w / 2, y: 0 };
+            case "n": return { x: 0     , y:  h / 2 };
+            case "s": return { x: 0     , y: -h / 2 };
+            case "w": return { x:  w / 2, y: 0 };
             case "e": return { x: -w / 2, y: 0 };
         }
     }
 
     // delta를 local 좌표로 변환
     #deltaToLocal(event) {
-        const rad = -this.#rotation0 * Math.PI / 180;
-        const dwx = event.clientX - this.#boundaryRect.left - this.#startWorldX;
-        const dwy = event.clientY - this.#boundaryRect.top - this.#startWorldY;
-        return {
-            x: dwx * Math.cos(rad) - dwy * Math.sin(rad),
-            y: dwx * Math.sin(rad) + dwy * Math.cos(rad),
-        };
+
+        const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+        console.log('currentLocal',this.#startLocal.x,this.#startLocal.y,currentLocal.x,currentLocal.y);
+        
+        return{
+            x: currentLocal.x - this.#startLocal.x,
+            y: currentLocal.y - this.#startLocal.y
+        }
+
+        // const rad = -this.#rotation0 * Math.PI / 180;
+        // const dwx = event.clientX - this.#boundaryRect.left - this.#startWorldX;
+        // const dwy = event.clientY - this.#boundaryRect.top - this.#startWorldY;
+        // return {
+        //     x: dwx * Math.cos(rad) - dwy * Math.sin(rad),
+        //     y: dwx * Math.sin(rad) + dwy * Math.cos(rad),
+        // };
     }
 
     // 반대편 기준 리사이즈
@@ -522,6 +621,11 @@ export default class UiColorBarElement extends HTMLElement {
         const cxWorld = this.#anchorWorldX - (aOffX * cos - aOffY * sin);
         const cyWorld = this.#anchorWorldY - (aOffX * sin + aOffY * cos);
 
+        //  이부분 기준 좌표를 기준으로 너비 높이 변화로 처리되도록 개선하자.
+        // console.log('xxxxxxxxxxxxx',cxWorld - width / 2, cyWorld - height / 2, width, height);
+        // console.log('xxxxxxxxxxxxx',this.#left0 - aOffX,this.#top0 - aOffY, width, height);
+        // console.log('xxxxxxxxxxxyy',left,this.#cx0,right,top,bottom);
+        
         this.setRect(cxWorld - width / 2, cyWorld - height / 2, width, height);
     }
 
@@ -649,7 +753,7 @@ export default class UiColorBarElement extends HTMLElement {
     #boundaryRect = null
     clampToBoundary(refreshBoundaryRect = true){
         if(this.hasAttribute('data-clamp-boundary') && this.#boundary){
-            if(refreshBoundaryRect) this.#boundaryRect = this.#boundary.getBoundingClientRect();
+            if(refreshBoundaryRect) this.#boundaryRect = this.#boundary.getViewportRect?.()??this.#boundary.getBoundingClientRect();
             this.clampToRect(this.#boundaryRect);
         }
     }
@@ -766,7 +870,7 @@ export default class UiColorBarElement extends HTMLElement {
                     top: 50%;
                     width: max(100%, var(--controls-min-size, 80px));
                     height: max(100%, var(--controls-min-size, 80px));
-                    transform: translate(-50%, -50%);                    
+                    transform: translate(-50%, -50%);
                 }
                 :host .resize-handles{
                     pointer-events: none;
@@ -775,6 +879,14 @@ export default class UiColorBarElement extends HTMLElement {
                 }
                 :host .move-handle{
                     pointer-events: all;
+                    position: absolute;
+                    inset:0;
+                    width: max(100%,calc(var(--width) *  var(--zoom,1) ));
+                    height: max(100%,calc(var(--height) *  var(--zoom,1) ));
+                    z-index: 1;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
                 }
                 :host([data-no-move]) .move-handle{
                     pointer-events: none;
@@ -858,8 +970,10 @@ export default class UiColorBarElement extends HTMLElement {
             ${this.constructor.appendStyle}
             <div part="wapper" class="wapper">                
                 <div part="border" class="border"></div>
+                <div part="content-border" class="content-border"></div>
+
                 <div class="controls">
-                    <div part="content-border move-handle" class="content-border move-handle" data-move="move"></div>
+                    <div part="move-handle-area move-handle" class="move-handle-area move-handle" data-move="move"></div>
                     <div part="resize-handles" class="resize-handles" >
                         <div part="resize-handle resize-handle-c move-handle" class="resize-handle resize-handle-c move-handle" data-resize="c" data-move="move"></div>
 
