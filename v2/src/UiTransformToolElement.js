@@ -236,11 +236,24 @@ export default class UiColorBarElement extends HTMLElement {
         target.style.setProperty('--scale-x', this.scaleX);
         target.style.setProperty('--scale-y', this.scaleY);
         target.style.setProperty('--zoom', this.zoom);
+        const worldZoom = this.getWorldZoom();
+        target.style.setProperty('--world-zoom', this.worldZoom);
         target.classList.toggle('is-zoomed', this.zoom !== 1);
+        target.classList.toggle('is-world-zoomed', this.worldZoom !== 1);
     }
 
 
-
+    // ---- zoom 처리 ----
+    getParentWorldZoom() {
+        return this.#boundary?.getWorldZoom?.()??1;
+    }
+    getWorldZoom() {
+        const parentWorldZoom = this.getParentWorldZoom();
+        return parentWorldZoom * this.#zoom;
+    }
+    get worldZoom(){
+        return this.getWorldZoom();
+    }
 
 
     // ------------- 매트릭스 처리 --------------
@@ -276,7 +289,7 @@ export default class UiColorBarElement extends HTMLElement {
     // 부모와 연계해서 계산
     getMatrices(){
         let matrices = this.getBoundaryMatrices();       
-        const matrix = this.computeMatrix(this.#left, this.#top, this.#width, this.#height, this.#rotation, this.scaleX, this.scaleY);
+        const matrix = this.computeMatrix(this.#left, this.#top, this.#width, this.#height, this.#rotation, this.scaleX * this.#zoom, this.scaleY * this.#zoom);
         matrices.push(matrix);
         // console.log(matrices);
         return matrices;
@@ -320,6 +333,7 @@ export default class UiColorBarElement extends HTMLElement {
     #width0;
     #height0;
     #ratio0 = null
+    #centerLocal=null;
     
     handlePointerdown = (event) => {
         event.stopPropagation();
@@ -356,11 +370,6 @@ export default class UiColorBarElement extends HTMLElement {
             this.#transformType = 'move'
             this.#left0 = this.#left;
             this.#top0 = this.#top;
-            // this.#x0 = event.clientX - this.#boundaryRect.left;
-            // this.#y0 = event.clientY - this.#boundaryRect.top;
-
-
-            
             // 현재 툴 안의 내부 로컬 좌표가 구해진다. 회전해도 같은 값을 가진다.
             // 시작 포인터 local 좌표 저장 (delta 계산용)
             {
@@ -371,17 +380,12 @@ export default class UiColorBarElement extends HTMLElement {
         } else if (target.dataset.rotate) {
             this.#transformType = 'rotate'
             this.#rotation0 = this.#rotation;
-            // this.#x0 = this.#left + this.#width / 2;
-            // this.#y0 = this.#top + this.#height / 2;
-
-            // 부모 매트릭스를 쓰므로 left,top 이동해야함
-            this.#cx0 = this.#left + this.#width / 2
-            this.#cy0 = this.#top + this.#height / 2
-            // 현재 툴 안의 내부 로컬 좌표가 구해진다. 회전해도 같은 값을 가진다.
             // 시작 포인터 local 좌표 저장 (delta 계산용)
             {
                 this.matrixInv = this.getBoundaryMatrix().inverse();
                 this.#startLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+                const rect = this.getBoundingClientRect();
+                this.#centerLocal = this.matrixInv.transformPoint({x:rect.left+rect.width/2,y:rect.top+rect.height/2});
             }
 
         } else if (target.dataset.resize) {
@@ -443,28 +447,18 @@ export default class UiColorBarElement extends HTMLElement {
         const target = event.target; // 최초 이벤트 발생 요소 지정
         if (!target.hasPointerCapture(event.pointerId)) return;
 
-        if (this.#transformType === 'move') {
-            // const x1 = event.clientX - this.#boundaryRect.left;
-            // const y1 = event.clientY - this.#boundaryRect.top;
-            // const left = this.#left0 + x1 - this.#x0;
-            // const top = this.#top0 + y1 - this.#y0;
-            
-            const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
-            const left = this.#left0 + currentLocal.x - this.#startLocal.x;
-            const top = this.#top0 + currentLocal.y - this.#startLocal.y;
+        
 
+        if (this.#transformType === 'move') {
+            const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
+            const left = this.#left0 + (currentLocal.x - this.#startLocal.x);
+            const top = this.#top0 + (currentLocal.y - this.#startLocal.y);
             this.moveTo(left, top);
             this.clampToBoundary(false);
             this.dispatchCustomEvent('transform-update',{action:'move',handle:event.target})
         } else if (this.#transformType === 'rotate') {
-            // const x1 = event.clientX - this.#boundaryRect.left;
-            // const y1 = event.clientY - this.#boundaryRect.top;
-            // const rad = Math.atan2(y1 - this.#y0, x1 - this.#x0);
-            // const rotation = (rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
-
-
             const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});
-            const rad = Math.atan2(currentLocal.y - this.#cy0, currentLocal.x - this.#cx0);
+            const rad = Math.atan2(currentLocal.y - this.#centerLocal.y, currentLocal.x - this.#centerLocal.x);
             const rotation = (rad * (180 / Math.PI) + 360 + 270) % 360; //+ 270 은 아래가 0deg가 되도록
 
             this.rotateTo(rotation);
@@ -522,11 +516,10 @@ export default class UiColorBarElement extends HTMLElement {
 
     // delta를 local 좌표로 변환
     #deltaToLocal(event) {
-
         const currentLocal = this.matrixInv.transformPoint({x:event.clientX,y:event.clientY});        
         return{
-            x: currentLocal.x - this.#startLocal.x,
-            y: currentLocal.y - this.#startLocal.y
+            x: (currentLocal.x - this.#startLocal.x) ,
+            y: (currentLocal.y - this.#startLocal.y) 
         }
 
     }
@@ -539,6 +532,8 @@ export default class UiColorBarElement extends HTMLElement {
         
         const p = { x: h.x + d.x, y: h.y + d.y };
         const a = this.#anchorLocal;
+
+        
 
         // // 뒤집힘 계산
         if(!this.hasAttribute('data-no-flip')){
@@ -770,7 +765,7 @@ export default class UiColorBarElement extends HTMLElement {
         return this;
     }
 
-    toJSON() { return { left: this.left, top: this.top, width: this.width, height: this.height, rotation: this.rotation, scaleX: this.scaleX, scaleY: this.scaleY }; }
+    toJSON() { return { left: this.left, top: this.top, width: this.width, height: this.height, rotation: this.rotation, scaleX: this.scaleX, scaleY: this.scaleY , zoom: this.zoom}; }
     getLocalRect() {  return new DOMRect( this.left, this.top, this.width, this.height) }
     getViewportRect() { 
         const boundaryRect = this.#boundaryRect??this.#boundary.getBoundingClientRect();
@@ -818,7 +813,6 @@ export default class UiColorBarElement extends HTMLElement {
                     transform: translate(var(--left,0),var(--top,0)) rotate(var(--rotation,0deg)) scale(calc(var(--scale-x,1) * var(--zoom,1) ), calc( var(--scale-y,1) * var(--zoom,1)));
                     pointer-events: none;
                     z-index: 3;
-                    --inherit-zoom: var(--return-zoom, 1);
                 }
                 :host(.show-when-has-target:not(.has-target)){
                     display: none;
@@ -837,16 +831,16 @@ export default class UiColorBarElement extends HTMLElement {
                     z-index: 1;
                     left: 50%;
                     top: 50%;
-                    transform: translate(-50%, -50%) scale(calc(1 / var(--zoom,1) / var(--inherit-zoom,1) ));
+                    transform: translate(-50%, -50%) scale(calc(1 / var(--world-zoom,1) ));
                 }
-                :host(.is-zoomed) .content-border,
-                :host-context(.is-zoomed) .content-border{
+                :host(.is-world-zoomed) .content-border,
+                :host-context(.is-world-zoomed) .content-border{
                     outline: var(--content-border-width, 1px) var(--content-border-style, dashed) var(--content-border-color, #f009);
                 }
                 :host .border{
                     pointer-events: none;
                     position: absolute;
-                    outline: calc( var(--border-width, 2px) / var(--zoom,1) / var(--inherit-zoom,1) ) var(--border-style, dashed) var(--border-color, #000);
+                    outline: calc( var(--border-width, 2px) / var(--world-zoom,1) ) var(--border-style, dashed) var(--border-color, #000);
                     inset:0;
                 }
                 :host([data-no-border]) .border{
@@ -860,7 +854,7 @@ export default class UiColorBarElement extends HTMLElement {
                     top: 50%;
                     width: max(100%, var(--controls-min-size, 80px));
                     height: max(100%, var(--controls-min-size, 80px));
-                    x-transform: translate(-50%, -50%) scale(calc(1 / var(--zoom,1) / var(--inherit-zoom,1) ));
+                    x-transform: translate(-50%, -50%) scale(calc(1 / var(--world-zoom,1) ));
                     transform: translate(-50%, -50%);
                 }
                 :host .resize-handles{
@@ -895,7 +889,7 @@ export default class UiColorBarElement extends HTMLElement {
                     contain: strict;
                     overflow: hidden;
                     background-color: #fff;
-                    transform: translate(-50%, -50%)  scale(calc(1 / var(--zoom,1) / var(--inherit-zoom,1) ));;
+                    transform: translate(-50%, -50%)  scale(calc(1 / var(--world-zoom,1) ));;
                 }
                 :host([data-no-resize]) .resize-handle{
                     pointer-events: none;
@@ -921,9 +915,9 @@ export default class UiColorBarElement extends HTMLElement {
                     left: 50%;
                     top: 100%;
                     transform: translate(-50%, 0%);
-                    bottom: calc(var(--handle-size,12px) * -2  / var(--zoom,1) / var(--inherit-zoom,1) );
+                    bottom: calc(var(--handle-size,12px) * -2  / var(--world-zoom,1) );
                     width: 0px;
-                    border-right: calc( var(--border-width,2px) / var(--zoom,1) / var(--inherit-zoom,1) ) var(--border-style,dashed) var(--border-color,#000);
+                    border-right: calc( var(--border-width,2px) / var(--world-zoom,1) ) var(--border-style,dashed) var(--border-color,#000);
                     box-sizing: content-box;
                 }
                 :host .rotate-handle{
@@ -940,7 +934,7 @@ export default class UiColorBarElement extends HTMLElement {
                     contain: strict;
                     overflow: hidden;
                     background-color: #fff;
-                    transform: translate(calc(-50% + var(--border-width,2px) / 2), 50%)  scale(calc(1 / var(--zoom,1) / var(--inherit-zoom,1) ));
+                    transform: translate(calc(-50% + var(--border-width,2px) / 2), 50%)  scale(calc(1 / var(--world-zoom,1) ));
                 }
                 :host .rotate-handle.is-active{
                     filter:invert(1);
@@ -956,8 +950,6 @@ export default class UiColorBarElement extends HTMLElement {
                     flex-direction: column;
                     justify-content: center;
                     align-items: center;
-
-                    --return-zoom: calc( var(--inherit-zoom,1) * var(--zoom,1) );
                 }
             </style>
             ${this.constructor.appendStyle}
